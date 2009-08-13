@@ -1,0 +1,29 @@
+// 
+// English Language File for ExampleObject Plugin
+//
+
+<!-- language file start -->
+obj_xscl#:#Learning Module SCORM Cloud
+objs_xscl#:#SCORM Cloud Learning Resources 
+obj_xscl_duplicate#:#Copy
+objs_xscl_duplicate#:#Copy SCORM Cloud Package
+obj_xscl_select#:#Select SCORM Cloud Package
+xscl_add#:#Add SCORM Cloud Package
+xscl_new#:#Add New SCORM Cloud Package
+content#:#Content
+properties#:#Properties
+edit_properties#:#Edit Properties
+package_properties#:#SCORM Player Options
+meta_data#:#Metadata
+learning_progress#:#Learning Progress
+tracking#:#Tracking Data
+edit_package_properties#:#Edit SCORM Player Options
+title#:#Title
+description#:#Description
+option_one#:#Option One
+option_two#:#Option Two
+save#:#Save
+cancel#:#Cancel
+edit#:#Edit
+status#:#Status
+offline#:#Offline
