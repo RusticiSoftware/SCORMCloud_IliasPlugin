@@ -23,11 +23,8 @@
 
 
 include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
-include_once("class.ilObjectScormCloudReg.php");
-
-
-require_once('./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/SCORM_CLOUD_API/ScormEngineService.php');
-require_once('./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/SCORM_CLOUD_API/UploadService.php');
+require_once("class.ilObjectScormCloudReg.php");
+require_once("ScormCloudService.php");
 
 /**
 * User Interface class for example repository object.
@@ -286,7 +283,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 	*/
 	public function updateProperties()
 	{
-		global $tpl, $lng, $ilCtrl;
+		global $tpl, $lng, $ilCtrl, $ScormCloudService;
 	
 //	echo "<script>alert('" . "NAME: " . $_FILES["scormcloudfile"]["name"] . "');</script>";
 	
@@ -314,11 +311,8 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 					$mode = "new"; 
 				}
 		
-				//$ScormService = new ScormEngineService($CFG->scormcloudurl,$CFG->scormcloudappid,$CFG->scormcloudsecretkey);
-				$ScormService = new ScormEngineService("http://dev.cloud.scorm.com/EngineWebServices", "john", "32wE8eRYmMKy5Rcl171ZrR3lSIj2a4QyZXbwWZE7");
-			
-				$courseService = $ScormService->getCourseService();
-				$uploadService = $ScormService->getUploadService();
+				$courseService = $ScormCloudService->getCourseService();
+				$uploadService = $ScormCloudService->getUploadService();
 		
 				$courseId = $id;
 				//echo '$courseId='.$courseId.'<br>';
@@ -429,7 +423,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		*/
 		function editPackageProperties()
 		{
-			global $tpl, $ilTabs;
+			global $tpl, $ilTabs, $ScormCloudService;
 
 			$ilTabs->activateTab("package_properties");			
 			
@@ -446,8 +440,11 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$relStylesheetUrl = str_replace("./", "", $relStylesheetUrl);
 			$stylesheet = $baseUrl.$relStylesheetUrl;			
 			
-			$ScormService = new ScormEngineService("http://dev.cloud.scorm.com/EngineWebServices", "john", "32wE8eRYmMKy5Rcl171ZrR3lSIj2a4QyZXbwWZE7");
-			$courseService = $ScormService->getCourseService();
+			if (empty($ScormCloudService)) {
+				throw new Exception();
+			}
+			
+			$courseService = $ScormCloudService->getCourseService();
 			$pkgPropertyEditorUrl = $courseService->GetPropertyEditorUrl($this->object->getId(), $stylesheet);
 			
 			$iframe = "<iframe frameborder='0' src='".$pkgPropertyEditorUrl."' style='width:100%;height:600px;'> </iframe>";
@@ -533,12 +530,9 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		*/
 		function showTrackingDetail($regId)
 		{
-			global $tpl;
-			
-			include_once("SCORM_CLOUD_API/ScormEngineService.php");
+			global $tpl, $ScormCloudService;
 
-			$ScormService = new ScormEngineService("http://dev.cloud.scorm.com/EngineWebServices", "john", "32wE8eRYmMKy5Rcl171ZrR3lSIj2a4QyZXbwWZE7");
-			$sr = $ScormService->CreateNewRequest();
+			$sr = $ScormCloudService->CreateNewRequest();
 			$parameterMap = Array('regid' => $regId);
 			$parameterMap['resultsformat'] = "full";
 			$parameterMap['format'] = "json";
@@ -547,13 +541,13 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$dataUrl = $sr->ConstructUrl("rustici.registration.getRegistrationResult");
 
 			// Need jquery and the regreport.js 
-			$tpl->addJavaScript("./Modules/Scorm2004/scripts/questions/jquery.js");
-			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/regreport.js");
-			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/jquery-ui.js");
+			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/jquery.js");
+			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/jquery-ui.js");
+			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/regreport.js");
 			
 			$removeMe = strstr($currentUrl, "ilias.php");
 			$baseUrl = str_replace($removeMe, "", $currentUrl);
-			$stylesheet = $baseUrl."Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/css/ui-lightness/jquery-ui-1.7.2.custom.css";
+			$stylesheet = $baseUrl."Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/css/ui-lightness/jquery-ui-1.7.2.custom.css";
 			
 
 			$stylesheetLink = '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />';
@@ -571,7 +565,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 	*/
 	function showContent()
 	{
-		global $tpl, $ilTabs;
+		global $tpl, $ilTabs, $ScormCloudService;
 		
 		global $ilias;
 		
@@ -586,8 +580,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$reg->doCreate();
 		}
 
-		$ScormService = new ScormEngineService("http://dev.cloud.scorm.com/EngineWebServices", "john", "32wE8eRYmMKy5Rcl171ZrR3lSIj2a4QyZXbwWZE7");
-		$regService = $ScormService->getRegistrationService();
+		$regService = $ScormCloudService->getRegistrationService();
 		
 		if($_GET['refreshRegStatus'] == "true") {
 			
@@ -666,11 +659,9 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 	
 	function isPackageImportedInScormCloud()
 	{
-		global $CFG;
+		global $ScormCloudService;
 
-		//$ScormService = new ScormEngineService($CFG->scormcloudurl,$CFG->scormcloudappid,$CFG->scormcloudsecretkey);
-		$ScormService = new ScormEngineService("http://dev.cloud.scorm.com/EngineWebServices", "john", "32wE8eRYmMKy5Rcl171ZrR3lSIj2a4QyZXbwWZE7");
-		$courseService = $ScormService->getCourseService();
+		$courseService = $ScormCloudService->getCourseService();
 
 		$allResults = $courseService->GetCourseList();
 

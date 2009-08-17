@@ -1,6 +1,6 @@
 <?php
 
-require_once('./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/SCORM_CLOUD_API/ScormEngineService.php');
+require_once('ScormCloudService.php');
 
 class ilObjScormCloudReg
 {
@@ -151,8 +151,9 @@ class ilObjScormCloudReg
 	
 	function isRegistrationCreatedInScormCloud()
 	{
-		$ScormService = new ScormEngineService("http://dev.cloud.scorm.com/EngineWebServices", "john", "32wE8eRYmMKy5Rcl171ZrR3lSIj2a4QyZXbwWZE7");
-		$registrationService = $ScormService->getRegistrationService();
+		global $ScormCloudService;
+		
+		$registrationService = $ScormCloudService->getRegistrationService();
 		$regArray = $registrationService->GetRegistrationList($this->getPK(), $this->getPkgId());
 
 		return count($regArray) > 0;

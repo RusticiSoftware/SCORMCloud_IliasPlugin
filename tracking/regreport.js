@@ -18,40 +18,57 @@ $(document).ready(
     );
 
 function getRegistrationResultCallback(data) {
-    render(data.rsp.registrationreport.activity, $('#report'));
+    render(data.rsp.registrationreport.activity, $('#report'), true);
+	$(function() {
+		$(".accordian").accordion({autoHeight: false});
+	});
     makeCollapseableTreeFromUnorderedList('report');
 }
 
 // Recursively renders the activity and it's children as nested unordered lists
-function render(activity, parent) {
+function render(activity, parent, isFirst) {
 
-    $('<span class="activityTitle" >' + activity.title + '</span>').appendTo(parent);
-    var ul = $('<ul>');
-    if(activity.objectives.length > 0 && activity.objectives[0].progressstatus){
-        ul.append(fmtListItem('Satisfied', activity.satisfied));
-    }
-    else{
-        ul.append(fmtListItem('Satisfied', "unknown"));
-    }
-    if(activity.attemptprogressstatus){
-        ul.append(fmtListItem('Completed', activity.completed));
-    }
-    else{
-        ul.append(fmtListItem('Completed', "unknown"));
-    }
-    ul.append(fmtListItem('Progress Status', activity.progressstatus))
-        .append(fmtListItem('Atttempts', activity.attempts))
-        .append(fmtListItem('Suspended', activity.suspended))
-        .append(fmtListObjectiveItems(activity.objectives))
-        .append(fmtRuntime(activity.runtime))
-        .appendTo(parent);
-                    
-    // If child activities are defined, render them as well
-    if (activity.children !== undefined && activity.children !== null && activity.children !== "") {
-        $(activity.children.activity).each(function() {
+ 	var hasChildActivities = activity.children !== undefined && activity.children !== null && activity.children !== "";
+
+	if (hasChildActivities) {
+		
+		if (isFirst === null || isFirst === undefined)
+	    	$('<span class="activityTitle" >' + activity.title + '</span>').appendTo(parent);
+	
+	    var ul = $('<ul>');
+	    // if(activity.objectives.length > 0 && activity.objectives[0].progressstatus){
+	    //     ul.append(fmtListItem('Satisfied', activity.satisfied));
+	    // }
+	    // else{
+	    //     ul.append(fmtListItem('Satisfied', "unknown"));
+	    // }
+	    // if(activity.attemptprogressstatus){
+	    //     ul.append(fmtListItem('Completed', activity.completed));
+	    // }
+	    // else{
+	    //     ul.append(fmtListItem('Completed', "unknown"));
+	    // }
+	    // ul.append(fmtListItem('Progress Status', activity.progressstatus))
+	    //     .append(fmtListItem('Atttempts', activity.attempts))
+	    //     .append(fmtListItem('Suspended', activity.suspended))
+	    //     .append(fmtListObjectiveItems(activity.objectives))
+	    //     .append(fmtRuntime(activity.runtime))
+	    //     .appendTo(parent);
+
+		ul.appendTo(parent);
+		
+		$(activity.children.activity).each(function() {
             render(this, $('<li>').appendTo(ul).get());
         });
-    }
+		
+	} else {
+		
+		var div = $('<div class="accordian">');
+		var title = $('<h3><a href="#" class="activityTitle" >' + activity.title + '</a></h3>');
+		var details = $('<div><p>This is where the details go...</p></div>');
+		div.append(title).append(details).append(title).append(details).append(title).append(details).append(title).append(details);
+		div.appendTo(parent);
+	}
 }
 
 // Helper to print name/value pairs of activity data
@@ -302,27 +319,33 @@ function fmtRtObjectives(objectives) {
 // the unordered lists within the specified div.
 function makeCollapseableTreeFromUnorderedList(divName) {
 
-  $('#' + divName + ' li:has(ul)')  
-    .click(function(event){   
-      if (this == event.target) { 
-        if ($(this).children().is(':hidden')) {   
-          $(this) 
-            .css('list-style-image','url(minus.gif)') 
-            .children().show(); 
-        } else { 
-          $(this) 
-            .css('list-style-image','url(plus.gif)') 
-            .children().not('span').hide(); 
-        } 
-      } 
-      return false;   
-    })
-    .css('cursor','pointer')   
-    .click();
-    
-  $('li:not(:has(ul))').css({   
-    cursor: 'default', 
-    'list-style-image':'none' 
-  });
+  // $('#' + divName + ' li:has(ul)')  
+  //   .click(function(event){   
+  //     if (this == event.target) { 
+  //       if ($(this).children().is(':hidden')) {   
+  //         $(this) 
+  //           .css('list-style-image','url(minus.gif)') 
+  //           .children().show(); 
+  //       } else { 
+  //         $(this) 
+  //           .css('list-style-image','url(plus.gif)') 
+  //           .children().not('span').hide(); 
+  //       } 
+  //     } 
+  //     return false;   
+  //   })
+  //   .css('cursor','pointer')   
+  //   .click();
+  //   
+  // $('li:not(:has(ul))').css({   
+  //   cursor: 'default', 
+  //   'list-style-image':'none' 
+  // });
+
+
+
+
+
+
 }
 
