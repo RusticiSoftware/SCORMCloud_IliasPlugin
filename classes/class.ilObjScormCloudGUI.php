@@ -456,23 +456,42 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		}
 
 
+		function showTracking()
+		{
+			global $ilTabs;
+			$ilTabs->activateTab("tracking");
+			
+			if(empty($_GET['regId'])) 
+			{
+				$this->showTrackingMain();
+			}
+			else 
+			{
+				$this->showTrackingDetail($_GET['regId']);
+			}
+		}
+
 		/**
 		* Show tracking
 		*/
-		function showTracking()
+		function showTrackingMain()
 		{
-			global $tpl, $ilTabs;
-
-			global $ilias;
+			global $tpl, $ilias;
 
 			$userId = $ilias->account->getId();
 			$pkgId = $this->object->getId();
 
-			$ilTabs->activateTab("tracking");
-
 			$reg = new ilObjScormCloudReg();
 			$regs = $reg->GetRegistrationsForPackageId($pkgId);
 			
+			if (!empty($_SERVER['HTTPS'])) {
+				$currentUrl = "https://";
+			} else {
+				$currentUrl = "http://";
+			}
+
+			$currentUrl .= $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
+				
 			$trackingTable = '<table class="fullwidth">'.
 					'<tr class="tbltitle">'.
 						'<th class="std" colspan="8">Tracking Items</th>'.
@@ -487,9 +506,10 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			foreach ($regs as $r) {
 
 				$userObj = new ilObjUser($r->getUserId());
+				
 
 				$trackingTable .= '<tr class="tblrow1">'.
-						'<td class="std"><a href="">'.$userObj->getLastName().', '.$userObj->getFirstName().'</a></td>'.
+						'<td class="std"><a href="'.$currentUrl.'&regId='.$r->getPK().'">'.$userObj->getLastName().', '.$userObj->getFirstName().'</a></td>'.
 						'<td class="std">'.ucfirst($r->getCompletion()).'</td>'.
 						'<td class="std">'.ucfirst($r->getSatisfaction()).'</td>'.
 						'<td class="std">'.$this->formatSeconds($r->getTotalTime()).'</td>'.
@@ -506,6 +526,40 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			
 
 			$tpl->setContent($trackingTable);
+		}
+		
+		/**
+		* Show tracking
+		*/
+		function showTrackingDetail($regId)
+		{
+			global $tpl;
+			
+			include_once("SCORM_CLOUD_API/ScormEngineService.php");
+
+			$ScormService = new ScormEngineService("http://dev.cloud.scorm.com/EngineWebServices", "john", "32wE8eRYmMKy5Rcl171ZrR3lSIj2a4QyZXbwWZE7");
+			$sr = $ScormService->CreateNewRequest();
+			$parameterMap = Array('regid' => $regId);
+			$parameterMap['resultsformat'] = "full";
+			$parameterMap['format'] = "json";
+			$parameterMap['jsoncallback'] = "getRegistrationResultCallback";
+			$sr->setMethodParams($parameterMap);
+			$dataUrl = $sr->ConstructUrl("rustici.registration.getRegistrationResult");
+
+			// Need jquery and the regreport.js 
+			$tpl->addJavaScript("./Modules/Scorm2004/scripts/questions/jquery.js");
+			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/regreport.js");
+			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/jquery-ui.js");
+			
+			$removeMe = strstr($currentUrl, "ilias.php");
+			$baseUrl = str_replace($removeMe, "", $currentUrl);
+			$stylesheet = $baseUrl."Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/css/ui-lightness/jquery-ui-1.7.2.custom.css";
+			
+
+			$stylesheetLink = '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />';
+			
+
+			$tpl->setContent($stylesheetLink.'<div dataUrl="'.$dataUrl.'" id="report"/>');
 		}
 
 

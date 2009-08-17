@@ -1,0 +1,29 @@
+/*.activityTitle { color: blue; font-size: 110% }
+.dataValue {font-weight: bold }
+report li {list-style: none; padding: 1px }
+#report ul { margin-top: 0; margin-bottom: 0px; font-size: 10pt; }
+#report {padding: 0;}*/
+/*
+ul {
+
+}
+#report ul li {
+	border-bottom: 1px solid #ccc;
+	list-style: none;
+}
+
+#report ul ul li {
+	cursor: pointer;
+	background-color: #f2f2f2;
+	color: blue;
+	font-weight: normal;
+}
+
+#report ul ul li:hover {
+	cursor: pointer;
+	background-color: #f2f2f2;
+	color: darkblue;
+	text-decoration: underline;
+	
+}
+*/
