@@ -1,9 +1,14 @@
-/*.activityTitle { color: blue; font-size: 110% }
+.activityTitle { color: black; font-size: 110% }
 .dataValue {font-weight: bold }
-report li {list-style: none; padding: 1px }
+li {list-style: none; padding: 1px }
 #report ul { margin-top: 0; margin-bottom: 0px; font-size: 10pt; }
-#report {padding: 0;}*/
-/*
+#report {padding: 0;}
+
+.correct {color: #090;}
+.incorrect {color: #C00;}
+.interactions {margin-left: 10px; margin-top: 10px;}
+.activity-details {margin-left: 10px; padding: 4px; border-top: 1px solid gray; border-bottom: 1px solid gray;}
+
 ul {
 
 }
@@ -26,4 +31,3 @@ ul {
 	text-decoration: underline;
 	
 }
-*/

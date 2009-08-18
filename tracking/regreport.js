@@ -19,10 +19,11 @@ $(document).ready(
 
 function getRegistrationResultCallback(data) {
     render(data.rsp.registrationreport.activity, $('#report'), true);
-	$(function() {
-		$(".accordian").accordion({autoHeight: false});
-	});
-    makeCollapseableTreeFromUnorderedList('report');
+
+		$('.activityTitle').click(function() {
+			$(this).next().toggle(100);
+			return false;
+		});
 }
 
 // Recursively renders the activity and it's children as nested unordered lists
@@ -32,10 +33,10 @@ function render(activity, parent, isFirst) {
 
 	if (hasChildActivities) {
 		
-		if (isFirst === null || isFirst === undefined)
-	    	$('<span class="activityTitle" >' + activity.title + '</span>').appendTo(parent);
-	
-	    var ul = $('<ul>');
+		// if (isFirst === null || isFirst === undefined)
+		// 	    	$('<span class="activityTitle" >' + activity.title + '</span>').appendTo(parent);
+		// 	
+		// 	    var ul = $('<ul>');
 	    // if(activity.objectives.length > 0 && activity.objectives[0].progressstatus){
 	    //     ul.append(fmtListItem('Satisfied', activity.satisfied));
 	    // }
@@ -55,126 +56,93 @@ function render(activity, parent, isFirst) {
 	    //     .append(fmtRuntime(activity.runtime))
 	    //     .appendTo(parent);
 
-		ul.appendTo(parent);
+		// ul.appendTo(parent);
 		
 		$(activity.children.activity).each(function() {
-            render(this, $('<li>').appendTo(ul).get());
+            render(this, $('<div>').appendTo(parent).get());
         });
 		
 	} else {
 		
 		var div = $('<div class="accordian">');
-		var title = $('<h3><a href="#" class="activityTitle" >' + activity.title + '</a></h3>');
-		var details = $('<div><p>This is where the details go...</p></div>');
+		var title = $('<a href="#" class="activityTitle" >' + activity.title + '</a>');
+		
+		if(activity.objectives.length > 0 && activity.objectives[0].progressstatus){
+	        var satisfied = activity.satisfied;
+	    }
+	    else{
+	        var satisfied = "unknown";
+	    }
+	    if(activity.attemptprogressstatus){
+	        var completed = activity.completed;
+	    }
+	    else{
+	        var completed = "unknown";
+	    }
+		
+		if (completed == "unknown") {
+			var status = "Incomplete";
+		} else {
+			if (satisfied == "unknown") {
+				var status = "Completed";
+			} else {
+				var status = satisfied;
+			}
+		}
+		
+		if (activity.runtime === undefined) {
+	        var time = "Not Started";
+		} else {
+			var time = activity.runtime.total_time;
+			
+			if (time == "0000:00:00.00") {
+				time = activity.runtime.timetracked;
+			}
+			
+			var timeArray = time.split(':');
+			var hours = timeArray[0] * 1;
+			var minutes = timeArray[1] * 1;
+			var seconds = Math.ceil(timeArray[2]) * 1;
+			
+			if (hours + minutes + seconds ==  0) {
+				var timeString = "Learner has not attempted this activity."; 
+			} else {
+				var timeString = "";
+				if (hours > 0) {
+					timeString += hours + " hours, ";
+				}
+				if (minutes > 0 || hours > 0) {
+					timeString += minutes +  " minutes and ";
+				}
+				timeString += seconds + " seconds";
+				timeString = "Learner spent " + timeString + " on this activity."
+			}
+			
+		}
+		
+		var detailsHtml = "Status is <i>" + status + "</i>";
+		
+		var scoreKnown = false;
+		
+		if (scoreKnown) {
+			detailsHtml += " with a score of " + score;
+		}
+		detailsHtml += ". "; 
+		
+		if (time != "Not Started") {
+			detailsHtml += timeString;
+		} else {
+			detailsHtml += "Learner has not spent any time on this activity yet.";
+		}
+		
+		if (activity.runtime !== undefined && activity.runtime.interactions !== undefined) {
+	        detailsHtml += '<div class="interactions">' + fmtInteractions(activity.runtime.interactions) + '</div>';
+	    }
+		
+		var details = $('<div class="activity-details">' + detailsHtml + '</div>');
 		div.append(title).append(details).append(title).append(details).append(title).append(details).append(title).append(details);
 		div.appendTo(parent);
 	}
-}
-
-// Helper to print name/value pairs of activity data
-function fmtListItem(name, value) {
-
-    if (value === undefined || value === null) {
-        value = "";
-    }
-
-    return "<li>" + name + ": <span class='dataValue'>" + value + "</span></li>";
-}
-
-// Returns the html of one or more lists items representing objective data
-function fmtListObjectiveItems(objectives) {
-    
-    if (objectives === undefined) {
-        return "";
-    }   
-
-    var result = "";
-
-    $(objectives.objective).each(function(index) {
-      
-        temp_ul = $('<ul>')
-                .append(fmtListItem('Id', this.id))
-                .append(fmtListItem('Measure Status', this.measurestatus));
-        if(this.measurestatus){
-            temp_ul.append(fmtListItem('Normalized Measure', this.normalizedmeasure));
-        }
-        else{
-            temp_ul.append(fmtListItem('Normalized Measure', "unknown"));
-        }
-        temp_ul.append(fmtListItem('Progress Measure', this.progressstatus))
-                .append(fmtListItem('Satisfied Status', this.satisfiedstatus));
-        result = result + '<li>' +
-            $('<li>')
-            .append('Activity Objective #' + (index+1))
-            .append(temp_ul)
-            .html() +  '</li>';
-    });
-  
-    return result;
-}
-
-
-// Returns the html of the runtime data if it exists
-function fmtRuntime(runtime) {
-    
-    if (runtime === undefined) {
-        return "";
-
-    } else {
-
-        return $('<li>')
-            .append('Runtime Data')
-            .append($('<ul>')
-                .append(fmtListItem('cmi.completion_status', runtime.completion_status))
-                .append(fmtListItem('cmi.credit', runtime.credit))
-                .append(fmtListItem('cmi.entry', runtime.entry))
-                .append(fmtListItem('cmi.exit', runtime.exit))
-                .append(fmtLearnerPreference(runtime.learnerpreference))
-                .append(fmtListItem('cmi.location', runtime.location))
-                .append(fmtListItem('cmi.mode', runtime.mode))
-                .append(fmtListItem('cmi.progress_measure', runtime.progress_measure))
-                .append(fmtListItem('cmi.score_scaled', runtime.score_scaled))
-                .append(fmtListItem('cmi.score_raw', runtime.score_raw))
-                .append(fmtListItem('cmi.score_min', runtime.score_min))
-                .append(fmtListItem('cmi.score_max', runtime.score_max))
-                .append(fmtListItem('cmi.total_time', runtime.total_time))
-                .append(fmtListItem('Total Time Tracked by SCORM Engine', runtime.timetracked))
-                .append(fmtListItem('cmi.success_status', runtime.success_status))
-                .append(fmtListItem('cmi.suspend_data', runtime.suspend_data))
-                .append(fmtInteractions(runtime.interactions))
-                .append(fmtRtObjectives(runtime.objectives))
-                .append(fmtComments(runtime.comments_from_learner, false))
-                .append(fmtComments(runtime.comments_from_lms, true))
-                .append(fmtStaticData(runtime.static))
-             )
-    }
-}
-
-function fmtLearnerPreference(learner_preference) {
-    
-    return $('<li>')
-        .append('cmi.learner_preference')
-        .append($('<ul>')
-            .append(fmtListItem('cmi.learner_preference.audio_level', learner_preference.audio_level))
-            .append(fmtListItem('cmi.learner_preference.language', learner_preference.language))
-            .append(fmtListItem('cmi.learner_preference.delivery_speed', learner_preference.delivery_speed))
-            .append(fmtListItem('cmi.learner_preference.audio_captioning', learner_preference.audio_captioning))
-         )
-}
-
-function fmtStaticData(static) {
-    
-    return $('<li>')
-        .append('Static Data')
-        .append($('<ul>')
-            .append(fmtListItem('cmi.completion_threshold', static.completion_threshold))
-            .append(fmtListItem('cmi.launch_data', static.launch_data))
-            .append(fmtListItem('cmi.learner_id', static.learner_id))
-            .append(fmtListItem('cmi.learner_name', static.learner_name))
-            .append(fmtListItem('cmi.max_time_allowed', static.max_time_allowed))
-            .append(fmtListItem('cmi.scaled_passing_score', static.scaled_passing_score))
-            .append(fmtListItem('cmi.time_limit_action', static.time_limit_action))
-         )
 }
 
 // Returns the html of one or more lists items representing objective data
@@ -187,62 +155,23 @@ function fmtInteractions(interactions) {
     var result = "";
       
     $(interactions.interaction).each(function(index) {
-      
-        result = result + '<li>' +
-            $('<li>')
-            .append('cmi.interactions.' + index)
-            .append($('<ul>')
-                .append(fmtListItem('cmi.interactions.' + index + '.id', this.id))
-                .append(fmtListItem('cmi.interactions.' + index + '.type', this.type))
-                .append(fmtInteractionObjectives('cmi.interactions.' + index + '.objectives.', this.objectives))
-                .append(fmtListItem('cmi.interactions.' + index + '.timestamp', this.timestamp))
-                .append(fmtCorrectResponses('cmi.interactions.' + index + '.correct_responses.', this.correct_responses))
-                .append(fmtListItem('cmi.interactions.' + index + '.weighting', this.weighting))
-                .append(fmtListItem('cmi.interactions.' + index + '.learner_response', this.learner_response))
-                .append(fmtListItem('cmi.interactions.' + index + '.result', this.result))
-                .append(fmtListItem('cmi.interactions.' + index + '.latency', this.latency))
-                .append(fmtListItem('cmi.interactions.' + index + '.description', this.description))
-            )
-            .html() + '</li>';
+
+		result += "<div class='interaction " + this.result + "'>";
+		result += this.id + " (" + this.type + "): Answered '" + this.learner_response + "'";
+		if (this.result == "correct") {
+			result += ".";
+		} else {
+			result += ", Expected '" + fmtCorrectResponses(this.correct_responses) + "'.";
+		}
+		result += "</div>";
             
     });
 
     return result;
 }
 
-// Returns the html of one or more lists items representing objective data
-function fmtComments(comments, fromLms) {
-    
-    if (comments === undefined || comments == null || comments == "") {
-        return "";
-    }   
-    
-    if (fromLms) {
-        var commentType = "comments_from_lms";
-    } else { 
-        var commentType = "comments_from_learner";
-    }
 
-    var result = "";
-      
-    $(comments.comment).each(function(index) {
-      
-        result = result + '<li>' +
-            $('<li>')
-            .append('cmi.' + commentType + '.' + index)
-            .append($('<ul>')
-                .append(fmtListItem('cmi.' + commentType + '.' + index + '.comment', this.value))
-                .append(fmtListItem('cmi.' + commentType + '.' + index + '.location', this.location))
-                .append(fmtListItem('cmi.' + commentType + '.' + index + '.timestamp', this.timestamp))
-            )
-            .html() + '</li>';
-            
-    });
-
-    return result;
-}
-
-function fmtCorrectResponses(title, correctResponses) {
+function fmtCorrectResponses(correctResponses) {
     
     if (correctResponses === undefined || correctResponses == null || correctResponses == "") {
         return "";
@@ -253,8 +182,8 @@ function fmtCorrectResponses(title, correctResponses) {
     $(correctResponses.response).each(function(index) {
       
         result = result + 
-            $('<li>')
-            .append(fmtListItem(title + index + '.pattern', this.id))
+            $('<div>')
+            .append(index + ': ', this.id)
             .html();
             
     });
@@ -262,90 +191,5 @@ function fmtCorrectResponses(title, correctResponses) {
     return result;
 }
 
-function fmtInteractionObjectives(title, interactionObjectives) {
-    
-    if (interactionObjectives === undefined || interactionObjectives == null || interactionObjectives == "") {
-        return "";
-    }   
 
-    var result = "";
-      
-    $(interactionObjectives.objective).each(function(index) {
-      
-        result = result + 
-            $('<li>')
-            .append(fmtListItem(title + index + '.id', this.id))
-            .html();
-            
-    });
-
-    return result;
-}
-
-// Returns the html of one or more lists items representing objective data
-function fmtRtObjectives(objectives) {
-    
-    if (objectives === undefined || objectives == null || objectives == '') {
-        return "";
-    }   
-
-    var result = "";
-      
-    $(objectives.objective).each(function(index) {
-      
-        result = result + '<li>' +
-            $('<li>')
-            .append('cmi.objectives.' + index)
-            .append($('<ul>')
-                .append(fmtListItem('cmi.objectives.' + index + '.id', this.id))
-                .append(fmtListItem('cmi.objectives.' + index + '.score.scaled', this.score_scaled))
-                .append(fmtListItem('cmi.objectives.' + index + '.score.raw', this.score_raw))
-                .append(fmtListItem('cmi.objectives.' + index + '.score.min', this.score_min))
-                .append(fmtListItem('cmi.objectives.' + index + '.score.max', this.score_max))
-                .append(fmtListItem('cmi.objectives.' + index + '.success_status', this.success_status))
-                .append(fmtListItem('cmi.objectives.' + index + '.completion_status', this.completion_status))
-                .append(fmtListItem('cmi.objectives.' + index + '.progress_measure', this.progress_measure))
-                .append(fmtListItem('cmi.objectives.' + index + '.description', this.description))
-            )
-            .html() + '</li>';
-            
-    });
-
-    return result;
-}
-
-
-// Applies tree control type dhtml collapse/expand functionality to 
-// the unordered lists within the specified div.
-function makeCollapseableTreeFromUnorderedList(divName) {
-
-  // $('#' + divName + ' li:has(ul)')  
-  //   .click(function(event){   
-  //     if (this == event.target) { 
-  //       if ($(this).children().is(':hidden')) {   
-  //         $(this) 
-  //           .css('list-style-image','url(minus.gif)') 
-  //           .children().show(); 
-  //       } else { 
-  //         $(this) 
-  //           .css('list-style-image','url(plus.gif)') 
-  //           .children().not('span').hide(); 
-  //       } 
-  //     } 
-  //     return false;   
-  //   })
-  //   .css('cursor','pointer')   
-  //   .click();
-  //   
-  // $('li:not(:has(ul))').css({   
-  //   cursor: 'default', 
-  //   'list-style-image':'none' 
-  // });
-
-
-
-
-
-
-}
 

@@ -118,7 +118,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		// $ilCtrl->forwardCommand($new_gui);
 		
 	}
-	
+
 //
 // DISPLAY TABS
 //
@@ -151,15 +151,15 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$ilTabs->addTab("package_properties", $this->txt("package_properties"), $ilCtrl->getLinkTarget($this, "editPackageProperties"));
 		}
 		
-		if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
-		{		
-			$ilTabs->addTab("meta_data", $this->txt("meta_data"), $ilCtrl->getLinkTarget($this, "editMetadata"));
-		}
-		
-		if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
-		{		
-			$ilTabs->addTab("learning_progress", $this->txt("learning_progress"), $ilCtrl->getLinkTarget($this, "showLearningProgress"));
-		}
+		// if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
+		// {		
+		// 	$ilTabs->addTab("meta_data", $this->txt("meta_data"), $ilCtrl->getLinkTarget($this, "editMetadata"));
+		// }
+		// 
+		// if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
+		// {		
+		// 	$ilTabs->addTab("learning_progress", $this->txt("learning_progress"), $ilCtrl->getLinkTarget($this, "showLearningProgress"));
+		// }
 		
 		// a "tracking" tab
 		if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
@@ -542,12 +542,13 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 
 			// Need jquery and the regreport.js 
 			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/jquery.js");
-			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/jquery-ui.js");
+			//$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/jquery-ui.js");
 			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/regreport.js");
 			
 			$removeMe = strstr($currentUrl, "ilias.php");
 			$baseUrl = str_replace($removeMe, "", $currentUrl);
-			$stylesheet = $baseUrl."Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/css/ui-lightness/jquery-ui-1.7.2.custom.css";
+			$stylesheet = $baseUrl."Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/regreport.css";
+			//$stylesheet = $baseUrl."Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/css/ui-lightness/jquery-ui-1.7.2.custom.css";
 			
 
 			$stylesheetLink = '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />';
@@ -595,7 +596,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$reg->setCompletion($statusXml->registrationreport->complete);
 			$reg->setSatisfaction($statusXml->registrationreport->success);
 			$reg->setTotalTime($statusXml->registrationreport->totaltime);
-			$reg->setScore($statusXml->registrationreport->score);
+			$reg->setScore($statusXml->registrationreport->score * 100);
 			
 			$reg->setLastAccess(ilUtil::now());
 			$reg->setAttemptCount($reg->getAttemptCount() + 1);
