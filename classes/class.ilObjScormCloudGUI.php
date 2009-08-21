@@ -594,8 +594,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		
 		$ilTabs->activateTab("content");
 
-		$tpl->setContent("Hello World. My User ID is ".$ilias->account->getId()."Name: ".$ilias->account->getFirstName()." ".$ilias->account->getLastName());
-		
 		$userId = $ilias->account->getId();
 		$pkgId = $this->object->getId();
 		
@@ -643,14 +641,25 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		$currentUrl .= $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
 		$returnUrl = $currentUrl."&refreshRegStatus=true";
 		$launchHref = $regService->GetLaunchUrl($reg->getPK(), $returnUrl);
-		$launchString = "<a href='".$launchHref."'>Launch</a>";
-		$launchString = "<div style='margin: 20px; text-align: center'>".
-			"<strong>Status: </strong>".ucfirst($status).
-			" / <strong>Score</strong>: ". ($reg->getScore() == SCORE_UNKNOWN ? "Unknown" : ucfirst($reg->getScore())).
-			" / <strong>Total Time</strong>: ". $this->formatSeconds($reg->getTotalTime()).
-			"<br /><br />".	"<button style='cursor: hand; font-size: 110%; width: 125px' type='button' onclick='window.location=\"".$launchHref."\";'> Launch </button>".
-			"</div>";
+
+
+		$launchString = "<table cellspacing=0 cellpadding=0 style='width: 100%; margin: 20px; margin-top: 10px'>".
+			"<tr><td><strong>Status: </strong>".ucfirst($status).
+			"</td><td ><strong>Score</strong>: ". ($reg->getScore() == SCORE_UNKNOWN ? "Unknown" : ucfirst($reg->getScore())).
+			"</td><td ><strong>Total Time</strong>: ". $this->formatSeconds($reg->getTotalTime()).
+			"</td></tr>".
+			"<tr><td><strong>Attempts: </strong>".$reg->getAttemptCount().
+			"</td><td><strong>Last Access: </strong>".$reg->getLastAccess().
+			"</td><td>&nbsp;</td></tr>".
+			"</table>";
+
+		$launchString .= "<div style='margin: 10px; width: 100%; text-align: center'<button style='cursor: hand; font-size: 110%; width: 125px' type='button' onclick='window.location=\"".$launchHref."\";'> Launch </button></div>";
+			
 		
+		
+		// '<td class="std">'.$reg->getLastAccess().'</td>'.
+		// '<td class="std">'.$reg->getAttemptCount().'</td>'.
+		// 
 		$tpl->setContent($tableHeader.$launchString.$this->getTrackingReportHtml($reg->getPK(), false));
 	}
 	

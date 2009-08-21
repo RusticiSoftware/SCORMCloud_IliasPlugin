@@ -1,26 +1,13 @@
-In ilias3, what happens when jhayden has access to a course form repostiroy and course? same reg?
-
-
-1. More robust rollup
-2. Internationalization
-3. Screenshots!
-... what time is the meeting?
-
-//TODO: More robust periodic rollup in a hidden frameset
-//TODO: Better error handling, do we have import result now that we can trust?, well we do in a hacky way of doulbe checking after import
-//TODO: Internationalize text whre appropriate
-//TODO: Maybe do a tab that has: 1) Total Number of Registrations.  2) Number Completed, Incomplete, Passed and Failed... easy enough.
-
-Description
-Perhaps show tracking details....
 Last Access...
 Number of Launches...
 
-// Need more "value add" to launch page
+Improvements
 
-// More error handling
-// Look at troy's layout
+- More robust iframe-based rollup
+- Localize javascript report text
 
+Plug-in Issues
 
-// report layout
-
+- doDelete is not called upon deletion of object, causing dormant cloud packages.
+- plugIns need a way to tie into learning progress
+- plugIns need a way to expose metadata
