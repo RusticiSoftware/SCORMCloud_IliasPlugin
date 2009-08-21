@@ -11,3 +11,5 @@ Plug-in Issues
 - doDelete is not called upon deletion of object, causing dormant cloud packages.
 - plugIns need a way to tie into learning progress
 - plugIns need a way to expose metadata
+- is there a better way to set default permissions?
+- plug-in icon isn't always utilized, like in the existing repository object listing screen

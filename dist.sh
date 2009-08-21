@@ -6,5 +6,6 @@ mkdir -p ../build/Customizing/global/plugins/Services/Repository/RepositoryObjec
 cp -r . ../build/Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud
 rm -f ../dist/scormcloud-plugin-ilias4.zip
 cd ../build
-zip -r ../dist/scormcloud-plugin-ilias4.zip * -x \*/.svn/* -x \*dist.sh -x \*/todo.txt
+rm -f ../ScormCloud/scormcloud-plugin-ilias4.zip
+zip -r ../ScormCloud/scormcloud-plugin-ilias4.zip * -x \*/.svn/* -x \*dist.sh -x \*/todo.txt
 rm -rf ../build
