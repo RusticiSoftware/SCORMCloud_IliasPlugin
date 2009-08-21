@@ -1,3 +1,10 @@
 #!/bin/bash
-rm -f scormcloud-plugin-ilias4.zip
-zip -r scormcloud-plugin-ilias4.zip * -x \*/.svn/* -x dist.sh -x todo.txt
+rm -rf ../build
+rm -rf ../dist
+mkdir ../dist
+mkdir -p ../build/Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud
+cp -r . ../build/Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud
+rm -f ../dist/scormcloud-plugin-ilias4.zip
+cd ../build
+zip -r ../dist/scormcloud-plugin-ilias4.zip * -x \*/.svn/* -x \*dist.sh -x \*/todo.txt
+rm -rf ../build

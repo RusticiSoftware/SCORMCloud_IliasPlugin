@@ -31,7 +31,7 @@ function getRegistrationResultCallback(data) {
 			'<th style="font-weight: bold" nowrap="nowrap">Activity Title</th>' +
 			'<th style="font-weight: bold" nowrap="nowrap">Complete</th>' +
 			'<th style="font-weight: bold" nowrap="nowrap">Satisfied</th>' +
-			'<th style="font-weight: bold" nowrap="nowrap">Total Time</th>' +
+			'<th style="font-weight: bold" nowrap="nowrap">Time</th>' +
 			'<th style="font-weight: bold" nowrap="nowrap">Score</th>' +
 			'<th style="font-weight: bold" nowrap="nowrap"></th>' +
 		'</tr></table>';
@@ -93,7 +93,7 @@ function renderActivity(activity, parent, isFirst, level) {
     }
 
 	if (activity.runtime) {
-		var time = activity.runtime.timetracked;
+		var time = activity.runtime.timetracked.substring(2, 10); // allow 99 hours and trim millis
 	} else {
 		var time = "";
 	}
@@ -102,6 +102,7 @@ function renderActivity(activity, parent, isFirst, level) {
 	// This is actually a dummy link meant to just give a UI cue since the anywhere on the entire row can be clicked
 	// Thi could perhaps be changed to a downward pointing "open me" kind of arrow.
 	var detailsLink = "<span style='color: blue; cursor: hand'>details</span>";
+	var detailsLink = '<img border="0" style="vertical-align: middle;" src="./templates/default/images/asc_order.gif"/><img border="0" style="margin-left: 1px;vertical-align: middle;" src="./templates/default/images/asc_order.gif"/>';
 	
 
 	var activityRow = '<tr class="tblrow1 summary_row">' +

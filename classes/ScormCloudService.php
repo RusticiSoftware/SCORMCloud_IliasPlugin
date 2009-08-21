@@ -22,6 +22,9 @@ if (empty($scormcloud_url) || empty($scormcloud_app_id) || empty($scormcloud_sec
 	"application ID and secret key in the plugin.php configuration file ([ilias root]/Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/plugin.php).".
 	"<p>A free, basic-level application id can be requested from <a href='http://www.scorm.com'>www.scorm.com</a> for development/demo purposes.";
 	
+	// back button
+	$msg .= '<div style="width: 100%; text-align: center"><button onclick="javascript: history.go(-1)">back</button></div>';
+	
 	print "<h3>".$msg."</h3>";
 	
 	// kill processing after we've written the above msg to the browser

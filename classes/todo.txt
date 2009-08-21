@@ -1,10 +1,13 @@
-//TODO:  My status info looks funny, passed/failed/score... what's up
-//TODO: Create install.txt
+In ilias3, what happens when jhayden has access to a course form repostiroy and course? same reg?
+
+
+1. More robust rollup
+2. Internationalization
+3. Screenshots!
+... what time is the meeting?
 
 //TODO: More robust periodic rollup in a hidden frameset
-//TODO: Better error handling, do we have import result now that we can trust?
-//TODO: Only enable "Online" if package exists on cloud
-//TODO: Sort tracking screen by last name
+//TODO: Better error handling, do we have import result now that we can trust?, well we do in a hacky way of doulbe checking after import
 //TODO: Internationalize text whre appropriate
 //TODO: Maybe do a tab that has: 1) Total Number of Registrations.  2) Number Completed, Incomplete, Passed and Failed... easy enough.
 
@@ -21,34 +24,3 @@ Number of Launches...
 
 // report layout
 
-	$userObj = new ilObjUser($r->getUserId());
-
-$trackingTable = '<table class="fullwidth">'.
-		'<tr class="tbltitle">'.
-			'<th class="std" colspan="8">Course Report :: '.$courseTitle.'-'.$userObj->getLastName().', '.$userObj->getFirstName().'</th>'.
-		'</tr>'.
-		'<tr class="tblheader">'.
-			'<th class="tblheader,std" nowrap="nowrap">Completion</th>'.
-			'<th class="tblheader,std" nowrap="nowrap">Satisfaction</th>'.
-			'<th class="tblheader,std" nowrap="nowrap">Total Time</th>'.
-			'<th class="tblheader,std" nowrap="nowrap">Score</th>'.
-		'</tr>';
-
-foreach ($regs as $r) {
-
-
-	
-
-	$trackingTable .= '<tr class="tblrow1">'.
-			'<td class="std"><a href="'.$currentUrl.'&regId='.$r->getPK().'">'.$userObj->getLastName().', '.$userObj->getFirstName().'</a></td>'.
-			'<td class="std">'.ucfirst($r->getCompletion()).'</td>'.
-			'<td class="std">'.ucfirst($r->getSatisfaction()).'</td>'.
-			'<td class="std">'.$this->formatSeconds($r->getTotalTime()).'</td>'.
-			'<td class="std">'.($r->getScore() == SCORE_UNKNOWN ? "Unknown" : ucfirst($r->getScore())).'</td>'.
-			'<td class="std">'.$r->getLastAccess().'</td>'.
-			'<td class="std">'.$r->getAttemptCount().'</td>'.
-			'<td class="std">'.$r->getVersion().'</td>'.
-		'</tr>';
-}					
-		
-$trackingTable .= '</table>';
