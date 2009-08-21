@@ -1,11 +1,54 @@
-
+//TODO:  My status info looks funny, passed/failed/score... what's up
 //TODO: Create install.txt
-//TODO: Clean up data or do a fresh install of ilias and try to install the plug-in from scratch....
 
 //TODO: More robust periodic rollup in a hidden frameset
-//TODO: Investigate cloning, make it work:  is a cloned course tied to an existing cloud course?  If so, we need a shared guid instead of just object id.
 //TODO: Better error handling, do we have import result now that we can trust?
 //TODO: Only enable "Online" if package exists on cloud
 //TODO: Sort tracking screen by last name
 //TODO: Internationalize text whre appropriate
 //TODO: Maybe do a tab that has: 1) Total Number of Registrations.  2) Number Completed, Incomplete, Passed and Failed... easy enough.
+
+Description
+Perhaps show tracking details....
+Last Access...
+Number of Launches...
+
+// Need more "value add" to launch page
+
+// More error handling
+// Look at troy's layout
+
+
+// report layout
+
+	$userObj = new ilObjUser($r->getUserId());
+
+$trackingTable = '<table class="fullwidth">'.
+		'<tr class="tbltitle">'.
+			'<th class="std" colspan="8">Course Report :: '.$courseTitle.'-'.$userObj->getLastName().', '.$userObj->getFirstName().'</th>'.
+		'</tr>'.
+		'<tr class="tblheader">'.
+			'<th class="tblheader,std" nowrap="nowrap">Completion</th>'.
+			'<th class="tblheader,std" nowrap="nowrap">Satisfaction</th>'.
+			'<th class="tblheader,std" nowrap="nowrap">Total Time</th>'.
+			'<th class="tblheader,std" nowrap="nowrap">Score</th>'.
+		'</tr>';
+
+foreach ($regs as $r) {
+
+
+	
+
+	$trackingTable .= '<tr class="tblrow1">'.
+			'<td class="std"><a href="'.$currentUrl.'&regId='.$r->getPK().'">'.$userObj->getLastName().', '.$userObj->getFirstName().'</a></td>'.
+			'<td class="std">'.ucfirst($r->getCompletion()).'</td>'.
+			'<td class="std">'.ucfirst($r->getSatisfaction()).'</td>'.
+			'<td class="std">'.$this->formatSeconds($r->getTotalTime()).'</td>'.
+			'<td class="std">'.($r->getScore() == SCORE_UNKNOWN ? "Unknown" : ucfirst($r->getScore())).'</td>'.
+			'<td class="std">'.$r->getLastAccess().'</td>'.
+			'<td class="std">'.$r->getAttemptCount().'</td>'.
+			'<td class="std">'.$r->getVersion().'</td>'.
+		'</tr>';
+}					
+		
+$trackingTable .= '</table>';

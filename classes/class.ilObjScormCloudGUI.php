@@ -1,38 +1,16 @@
 <?php
-/*
-	+-----------------------------------------------------------------------------+
-	| ILIAS open source                                                           |
-	+-----------------------------------------------------------------------------+
-	| Copyright (c) 1998-2009 ILIAS open source, University of Cologne            |
-	|                                                                             |
-	| This program is free software; you can redistribute it and/or               |
-	| modify it under the terms of the GNU General Public License                 |
-	| as published by the Free Software Foundation; either version 2              |
-	| of the License, or (at your option) any later version.                      |
-	|                                                                             |
-	| This program is distributed in the hope that it will be useful,             |
-	| but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-	| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
-	| GNU General Public License for more details.                                |
-	|                                                                             |
-	| You should have received a copy of the GNU General Public License           |
-	| along with this program; if not, write to the Free Software                 |
-	| Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
-	+-----------------------------------------------------------------------------+
-*/
-
 
 include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
 require_once("class.ilObjectScormCloudReg.php");
 require_once("ScormCloudService.php");
 
 /**
-* User Interface class for example repository object.
+* User Interface class for SCORM Cloud repository object.
 *
 * User interface classes process GET and POST parameter and call
 * application classes to fulfill certain tasks.
 *
-* @author Alex Killing <alex.killing@gmx.de>
+* @author John Hayden <john.hayden@scorm.com>
 *
 * $Id$
 *
@@ -55,6 +33,34 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		// anything needed after object has been constructed
 		// - example: append my_id GET parameter to each request
 		//   $ilCtrl->saveParameter($this, array("my_id"));
+	}
+	
+	/**
+	* Overwritten from ancestor class ilObject2GUI.  Only change made was to comment
+	* out the cloning code.
+	*
+	* @access	public
+	*/
+	function create()
+	{
+		global $rbacsystem, $tpl;
+
+		$new_type = $_POST["new_type"] ? $_POST["new_type"] : $_GET["new_type"];
+
+		if (!$rbacsystem->checkAccess("create", $_GET["ref_id"], $new_type))
+		{
+			$this->ilias->raiseError($this->lng->txt("permission_denied"),$this->ilias->error_obj->MESSAGE);
+		}
+		else
+		{
+			$this->ctrl->setParameter($this, "new_type", $new_type);
+			$this->initEditForm("create", $new_type);
+			$tpl->setContent($this->form->getHTML());
+			
+			//$clone_html = $this->fillCloneTemplate('', $new_type);
+			
+			$tpl->setContent($this->form->getHTML().$clone_html);
+		}
 	}
 	
 	/**
@@ -95,7 +101,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 	* After object has been created -> jump to this command
 	*/
 	function getAfterCreationCmd()
-	{
+	{	
 		return "editProperties";
 	}
 
@@ -176,13 +182,13 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 // THE FOLLOWING METHODS IMPLEMENT SOME EXAMPLE COMMANDS WITH COMMON FEATURES
 // YOU MAY REMOVE THEM COMPLETELY AND REPLACE THEM WITH YOUR OWN METHODS.
 
-	function editMetadata() 
-	{
-		global $ilTabs, $ilCtrl, $tpl;
-
-		$ilTabs->activateTab("meta_data");		
-		$tpl->setContent("If I can tie into metadata, it'll go HERE");	
-	}
+	// function editMetadata() 
+	// {
+	// 	global $ilTabs, $ilCtrl, $tpl;
+	// 
+	// 	$ilTabs->activateTab("meta_data");		
+	// 	$tpl->setContent("If I can tie into metadata, it'll go HERE");	
+	// }
 
 //
 // Edit properties form
@@ -198,8 +204,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		$ilTabs->activateTab("properties");
 		$this->initPropertiesForm();
 		$this->getPropertiesValues();
-		// $tpl->addJavaScript("./Modules/Scorm2004/scripts/questions/jquery.js");
-		// $tpl->addJavaScript("./Modules/Scorm2004/scripts/questions/jquery-ui-min.js");
 		$tpl->setContent($this->form->getHTML());
 	}
 	
@@ -237,11 +241,11 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		
 		if ($this->object->getExistsOnCloud()) 
 		{
-			$uploadTxt = "Upload New SCORM/AICC .zip";
+			$uploadTxt = $this->txt("upload_new_package_version");
 		}
 		else 
 		{
-			$uploadTxt = "Upload SCORM/AICC .zip";
+			$uploadTxt = $this->txt("upload_package");
 		}
 		
 		$sf = new ilCustomInputGUI($uploadTxt, "scormfile");
@@ -249,7 +253,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		$mode = ""; // "update" if package already exists
 		$uploadFormHtml = '<form action="'.$CFG->wwwroot.'/mod/rscloud/uploadhandler.php?id=' . $id . '&mode='.$mode.'" method="post" '.
 		'enctype="multipart/form-data">'.
-		'<label for="file">Filename:</label>'.
 		'<input type="file" name="file" id="file" /> '.
 		'<br />'.
 		'<input type="submit" name="submit" value="Submit" />'.
@@ -382,6 +385,21 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 							break;
 						}
 					}
+					
+					// Here's where we set the default permissions.  Here's a spot where we have a good
+					// refId so use it to set the initial permissions.
+					if ($mode == "new") {
+						// Looks like a good spot to modify permissions since the object has been created
+						global $rbacadmin, $rbacreview;
+						
+						$user_role_id = 4;
+						$guest_role_id = 5;
+						$ref_id = $this->object->getRefId();
+						
+						$rbacadmin->grantPermission($guest_role_id, ilRbacReview::_getOperationIdsByName(array("visible")), $ref_id);
+						$rbacadmin->grantPermission($user_role_id, ilRbacReview::_getOperationIdsByName(array("visible","read")), $ref_id);
+						
+					}
 				}
 				
 
@@ -399,6 +417,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		}
 	
 	
+	
 		$this->initPropertiesForm();
 		if ($this->form->checkInput())
 		{
@@ -409,6 +428,9 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "editProperties");
 		}
+
+
+
 
 		$this->form->setValuesByPost();
 		$tpl->setContent($this->form->getHtml());
@@ -510,7 +532,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 						'<td class="std">'.ucfirst($r->getCompletion()).'</td>'.
 						'<td class="std">'.ucfirst($r->getSatisfaction()).'</td>'.
 						'<td class="std">'.$this->formatSeconds($r->getTotalTime()).'</td>'.
-						'<td class="std">'.$r->getScore().'</td>'.
+						'<td class="std">'.($r->getScore() == SCORE_UNKNOWN ? "Unknown" : ucfirst($r->getScore())).'</td>'.
 						'<td class="std">'.$r->getLastAccess().'</td>'.
 						'<td class="std">'.$r->getAttemptCount().'</td>'.
 						'<td class="std">'.$r->getVersion().'</td>'.
@@ -530,6 +552,13 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		*/
 		function showTrackingDetail($regId)
 		{
+			global $tpl;
+
+			$tpl->setContent($this->getTrackingReportHtml($regId));
+		}
+		
+		function getTrackingReportHtml($regId, $showTitle = true) {
+			
 			global $tpl, $ScormCloudService;
 
 			$sr = $ScormCloudService->CreateNewRequest();
@@ -552,9 +581,23 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			
 
 			$stylesheetLink = '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />';
+						
+			$regParts = split("-", $regId);
+			$userObj = new ilObjUser((int)$regParts[1]);
+				
+			if ($showTitle) {
+				$tableHeader = '<table style="width: 100%" class="fullwidth">'.
+						'<tr class="tbltitle">'.
+							'<th class="std">Course Report for '.$this->object->getTitle().'</th>'.
+							'<th align="right" style="text-align: right" class="std">'.$userObj->getFirstName().' '.$userObj->getLastName().'</th>'.
+						'</tr></table>';			
+			} else {
+				$tableHeader = '';
+			}
+			// The javascript report will render all activities			
 			
-
-			$tpl->setContent($stylesheetLink.'<div dataUrl="'.$dataUrl.'" id="report"/>');
+			return $stylesheetLink.$tableHeader.'<div dataUrl="'.$dataUrl.'" id="report"/>';
+			
 		}
 
 
@@ -587,16 +630,22 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			
 			$regStatus = $regService->GetRegistrationResult($reg->getPK(),0,'xml');
 			$statusXml = simplexml_load_string($regStatus);
-			
-			// echo $statusXml->registrationreport->complete;
-			// echo $statusXml->registrationreport->success;
-			// echo $statusXml->registrationreport->totalTime;
-			// echo $statusXml->registrationreport->score;
+	
+			// echo '<p>'.$statusXml->registrationreport->complete;
+			// echo '<p>'.$statusXml->registrationreport->success;
+			// echo '<p>'.$statusXml->registrationreport->totalTime;
+			// echo '<p>'.$statusXml->registrationreport->score;
 			
 			$reg->setCompletion($statusXml->registrationreport->complete);
 			$reg->setSatisfaction($statusXml->registrationreport->success);
 			$reg->setTotalTime($statusXml->registrationreport->totaltime);
-			$reg->setScore($statusXml->registrationreport->score * 100);
+			$scoreString = $statusXml->registrationreport->score;
+			if ($scoreString == "unknown") {
+				$score = SCORE_UNKNOWN;
+			} else {
+				$score = (float)$scoreString * 100;
+			}
+			$reg->setScore($score);
 			
 			$reg->setLastAccess(ilUtil::now());
 			$reg->setAttemptCount($reg->getAttemptCount() + 1);
@@ -642,19 +691,30 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$currentUrl = "http://";
 		}
 		
+		if ($reg->getSatisfaction() == "unknown") {
+			$status = $reg->getCompletion();
+		} else {
+			$status = $reg->getSatisfaction();
+		}
+		
+		$tableHeader = '<table style="width: 100%" class="fullwidth">'.
+				'<tr class="tbltitle">'.
+					'<th class="std">'.$this->object->getTitle().'</th>'.
+					'<th align="right" style="text-align: right" class="std"><strong>Learner: </strong>'.$ilias->account->getFirstName().' '.$ilias->account->getLastName().'</th>'.
+				'</tr></table>';
+		
 		$currentUrl .= $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
 		$returnUrl = $currentUrl."&refreshRegStatus=true";
 		$launchHref = $regService->GetLaunchUrl($reg->getPK(), $returnUrl);
 		$launchString = "<a href='".$launchHref."'>Launch</a>";
-		$launchString = "<div style='margin-top: 60px; text-align: center'>".
-			"<button style='cursor: hand; font-size: 120%; width: 125px' type='button' onclick='window.location=\"".$launchHref."\";'> Launch </button>".
-			"<br/><br/><br/>".ucfirst($reg->getCompletion())." / ".ucfirst($reg->getSatisfaction()).
-			"<br/><br/>Score: ".ucfirst($reg->getScore()).
-			//"<br/><br/>Total Time: ". $reg->getTotalTime()." seconds".
-			"<br/><br/>Total Time: ". $this->formatSeconds($reg->getTotalTime()).
+		$launchString = "<div style='margin: 20px; text-align: center'>".
+			"<strong>Status: </strong>".ucfirst($status).
+			" / <strong>Score</strong>: ". ($reg->getScore() == SCORE_UNKNOWN ? "Unknown" : ucfirst($reg->getScore())).
+			" / <strong>Total Time</strong>: ". $this->formatSeconds($reg->getTotalTime()).
+			"<br /><br />".	"<button style='cursor: hand; font-size: 110%; width: 125px' type='button' onclick='window.location=\"".$launchHref."\";'> Launch </button>".
 			"</div>";
 		
-		$tpl->setContent($launchString);
+		$tpl->setContent($tableHeader.$launchString.$this->getTrackingReportHtml($reg->getPK(), false));
 	}
 	
 	
@@ -687,7 +747,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		
 		return $time;
 	}	
-	
 	
 }
 ?>

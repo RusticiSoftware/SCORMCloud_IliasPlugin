@@ -1,3 +1,5 @@
+UNKNOWN = "unknown";
+
 $(document).ready(
         function() {
             // Using straight .getScript rather than the $.getJSON because we
@@ -18,130 +20,138 @@ $(document).ready(
     );
 
 function getRegistrationResultCallback(data) {
-    render(data.rsp.registrationreport.activity, $('#report'), true);
+	
+	$.fn.outerHTML = function() {
+	    var doc = this[0] ? this[0].ownerDocument : document;
+	    return $('<div>', doc).append(this.eq(0).clone()).html();
+	};
+    
+		var regTable = '<table cellspacing=0 cellpadding=0 style="margin-top: 10px; width: 100%" id="regtable"><tr class="tblheader">' +
+			'<th style="font-weight: bold" nowrap="nowrap">Activity Title</th>' +
+			'<th style="font-weight: bold" nowrap="nowrap">Complete</th>' +
+			'<th style="font-weight: bold" nowrap="nowrap">Satisfied</th>' +
+			'<th style="font-weight: bold" nowrap="nowrap">Total Time</th>' +
+			'<th style="font-weight: bold" nowrap="nowrap">Score</th>' +
+			'<th style="font-weight: bold" nowrap="nowrap"></th>' +
+		'</tr></table>';
 
-		$('.activityTitle').click(function() {
-			$(this).next().toggle(100);
+		$(regTable).appendTo($('#report'));
+
+		renderActivity(data.rsp.registrationreport.activity, $('#report'), true, 0);
+
+		$('.summary_row').click(function() {
+			$(this).next().toggle();
 			return false;
-		});
+		}).next().hide();
+		
+		$(function() {
+	        $('.summary_row').hover(function() {
+	            $(this).css('background-color', '#E9EFFD');
+	        },
+	        function() {
+	            $(this).css('background-color', 'white');
+	        });
+	    });
+	  
 }
 
 // Recursively renders the activity and it's children as nested unordered lists
-function render(activity, parent, isFirst) {
+function renderActivity(activity, parent, isFirst, level) {
 
- 	var hasChildActivities = activity.children !== undefined && activity.children !== null && activity.children !== "";
+ 	var hasChildActivities = activity.children && activity.children !== undefined && activity.children !== null && activity.children !== "";
 
-	if (hasChildActivities) {
-		
-		// if (isFirst === null || isFirst === undefined)
-		// 	    	$('<span class="activityTitle" >' + activity.title + '</span>').appendTo(parent);
-		// 	
-		// 	    var ul = $('<ul>');
-	    // if(activity.objectives.length > 0 && activity.objectives[0].progressstatus){
-	    //     ul.append(fmtListItem('Satisfied', activity.satisfied));
-	    // }
-	    // else{
-	    //     ul.append(fmtListItem('Satisfied', "unknown"));
-	    // }
-	    // if(activity.attemptprogressstatus){
-	    //     ul.append(fmtListItem('Completed', activity.completed));
-	    // }
-	    // else{
-	    //     ul.append(fmtListItem('Completed', "unknown"));
-	    // }
-	    // ul.append(fmtListItem('Progress Status', activity.progressstatus))
-	    //     .append(fmtListItem('Atttempts', activity.attempts))
-	    //     .append(fmtListItem('Suspended', activity.suspended))
-	    //     .append(fmtListObjectiveItems(activity.objectives))
-	    //     .append(fmtRuntime(activity.runtime))
-	    //     .appendTo(parent);
+    var satisfied = UNKNOWN;
+	var score = "";
+	
+	try {
+		if (activity.objectives.objective[0].progressstatus) {
+			var satisfied = activity.objectives.objective[0].satisfiedstatus;
+			if (activity.objectives[0].measurestatus) {
+				var score = activity.objectives.objective[0].normalizedmeasure * 100;
+			} 
+		}
+	} catch (e2) {
+		 try {
+			if (activity.objectives.objective.progressstatus) {
+				var satisfied = activity.objectives.objective.satisfiedstatus;
+				if (activity.objectives.objective.measurestatus) {
+					var score = activity.objectives.objective.normalizedmeasure * 100;
+				} 
+			}
+		} catch (e) {
+			// leave default uninit
+		}
+	}
+	
 
-		// ul.appendTo(parent);
-		
-		$(activity.children.activity).each(function() {
-            render(this, $('<div>').appendTo(parent).get());
-        });
-		
+    if (activity.attemptprogressstatus){
+        var completed = activity.completed;
+    }
+    else{
+        var completed = UNKNOWN;
+    }
+
+	if (activity.runtime) {
+		var time = activity.runtime.timetracked;
 	} else {
-		
-		var div = $('<div class="accordian">');
-		var title = $('<a href="#" class="activityTitle" >' + activity.title + '</a>');
-		
-		if(activity.objectives.length > 0 && activity.objectives[0].progressstatus){
-	        var satisfied = activity.satisfied;
-	    }
-	    else{
-	        var satisfied = "unknown";
-	    }
-	    if(activity.attemptprogressstatus){
-	        var completed = activity.completed;
-	    }
-	    else{
-	        var completed = "unknown";
-	    }
-		
-		if (completed == "unknown") {
-			var status = "Incomplete";
-		} else {
-			if (satisfied == "unknown") {
-				var status = "Completed";
-			} else {
-				var status = satisfied;
-			}
+		var time = "";
+	}
+
+	// if (hasChildActivities) { 
+	// 	var detailsLink = "";
+	// } else {
+		var detailsLink = "<span style='color: blue; cursor: hand'>details</span>";
+	// }
+
+	var activityRow = '<tr class="tblrow1 summary_row">' +
+		'<td style="padding-left: ' + level*20 + 'px; border-top: 1px solid black;" class="" nowrap="nowrap">' + activity.title + '</td>' +
+		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + "<span style='font-size: 175%' class='" + completed + "'>&bull;</span> " + '</td>' +
+		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + "<span style='font-size: 175%' class='" + satisfied + "'>&bull;</span> " + '</td>' +
+		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + time + '</td>' +
+		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + score + '</td>' +
+		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + detailsLink + '</td>' +
+	'</tr>';
+
+	$(activityRow).appendTo($('#regtable'));
+
+	// Details, include Activity Data. 
+	// attempts, suspended
+	// each objective
+	// interacdtions
+	
+	var attempts = 1;
+	var suspended = "true";
+	var obj = {id: "primary obj", normalizedMmeasure: 0.93, satisfiedStatus: UNKNOWN};
+	
+	var detailsDiv = $("<div>");
+	var objectivesDiv = $("<div style='width: 50%' class='rpt_objectives' id='objectives_" + activity.id + "'><div style='font-size: 90%; font-weight: bold'>Objectives</div></div>");
+	var interactionsDiv = $("<div style='width: 50%' class='rpt_interactions' id='interactions_" + activity.id + "'><div style='font-size: 90%; font-weight: bold'>Interactions</div></div>");
+	
+	objectivesDiv.appendTo(detailsDiv);
+	interactionsDiv.appendTo(detailsDiv);
+	
+	
+	if ( activity.runtime && activity.runtime !== undefined && activity.runtime.interactions !== undefined) {
+	    var interactionHtml = fmtInteractions(activity.runtime.interactions);
+		if (interactionHtml != "") {
+			$(fmtInteractions(activity.runtime.interactions)).appendTo(interactionsDiv);
 		}
-		
-		if (activity.runtime === undefined) {
-	        var time = "Not Started";
-		} else {
-			var time = activity.runtime.total_time;
-			
-			if (time == "0000:00:00.00") {
-				time = activity.runtime.timetracked;
-			}
-			
-			var timeArray = time.split(':');
-			var hours = timeArray[0] * 1;
-			var minutes = timeArray[1] * 1;
-			var seconds = Math.ceil(timeArray[2]) * 1;
-			
-			if (hours + minutes + seconds ==  0) {
-				var timeString = "Learner has not attempted this activity."; 
-			} else {
-				var timeString = "";
-				if (hours > 0) {
-					timeString += hours + " hours, ";
-				}
-				if (minutes > 0 || hours > 0) {
-					timeString += minutes +  " minutes and ";
-				}
-				timeString += seconds + " seconds";
-				timeString = "Learner spent " + timeString + " on this activity."
-			}
-			
-		}
-		
-		var detailsHtml = "Status is <i>" + status + "</i>";
-		
-		var scoreKnown = false;
-		
-		if (scoreKnown) {
-			detailsHtml += " with a score of " + score;
-		}
-		detailsHtml += ". "; 
-		
-		if (time != "Not Started") {
-			detailsHtml += timeString;
-		} else {
-			detailsHtml += "Learner has not spent any time on this activity yet.";
-		}
-		
-		if (activity.runtime !== undefined && activity.runtime.interactions !== undefined) {
-	        detailsHtml += '<div class="interactions">' + fmtInteractions(activity.runtime.interactions) + '</div>';
-	    }
-		
-		var details = $('<div class="activity-details">' + detailsHtml + '</div>');
-		div.append(title).append(details).append(title).append(details).append(title).append(details).append(title).append(details);
-		div.appendTo(parent);
+    }
+
+	if(activity.objectives){
+        $(fmtObjectives(activity.objectives)).appendTo(objectivesDiv);
+    }
+
+
+	// Put the details into a slot within the table
+	var details = $('<tr class="detail_row"><td style="padding-left: ' + level*20 + 'px;" colspan=6>' + detailsDiv.html() + '</td></tr>');
+
+	$(details).appendTo($('#regtable'));
+
+	if (activity.children) {
+		$(activity.children.activity).each(function() {
+	           renderActivity(this, $('<div>').appendTo(parent).get(), false, level+1);
+	       });
 	}
 }
 
@@ -152,24 +162,77 @@ function fmtInteractions(interactions) {
         return "";
     }   
 
-    var result = "";
+    var result = "<ul>";
       
     $(interactions.interaction).each(function(index) {
 
-		result += "<div class='interaction " + this.result + "'>";
-		result += this.id + " (" + this.type + "): Answered '" + this.learner_response + "'";
+		result += "<li class='interaction'>";
+		result += "<span style='font-size: 150%' class='" + this.result + "'>&bull;</span> " + this.id +
+		 ". answered <strong>" + fmtResponse(this.learner_response) + "</strong>";
 		if (this.result == "correct") {
 			result += ".";
 		} else {
-			result += ", Expected '" + fmtCorrectResponses(this.correct_responses) + "'.";
+			result += ", expected <strong>" + fmtCorrectResponses(this.correct_responses) + "</strong>.";
 		}
-		result += "</div>";
+		result += " <i>" + this.type.toLowerCase() + "</i>";
+		result += "</li>";
             
     });
+
+	result += "</ul";
 
     return result;
 }
 
+function fmtObjectives(objectives) {
+
+    if (objectives === undefined) {
+        return "";
+    }   
+
+    var result = "";
+
+    $(objectives.objective).each(function(index) {
+      
+        temp_ul = $('<ul style="margin-top: 5px">')
+                .append(fmtListItem('Id', this.id))
+                .append(fmtListItem('Measure Status', this.measurestatus));
+        if(this.measurestatus){
+            temp_ul.append(fmtListItem('Normalized Measure', this.normalizedmeasure));
+        }
+        else{
+            temp_ul.append(fmtListItem('Normalized Measure', UNKNOWN));
+        }
+        temp_ul.append(fmtListItem('Progress Measure', this.progressstatus))
+                .append(fmtListItem('Satisfied Status', this.satisfiedstatus));
+        result = result + '<li style="margin-top: 5px">' +
+            $('<li>')
+            .append(index > 0 ? 'Secondary Objective ' + index : "Primary Objective")
+            .append(temp_ul)
+            .html() +  '</li>';
+    });
+  
+    return result;
+}
+
+// Helper to print name/value pairs of activity data
+function fmtListItem(name, value) {
+
+    if (value === undefined || value === null) {
+        value = "";
+    }
+
+    return "<li>" + name + ": <span class='dataValue'>" + value + "</span></li>";
+}
+
+function fmtResponse(r) {
+	
+	r = r.toString();
+	r = r.replace(/\[,\]/g, ", ");
+	r = r.replace(/\[.\]/g, " -> ");
+	
+	return r;
+}
 
 function fmtCorrectResponses(correctResponses) {
     
@@ -183,7 +246,7 @@ function fmtCorrectResponses(correctResponses) {
       
         result = result + 
             $('<div>')
-            .append(index + ': ', this.id)
+            .append(index + ': ', fmtResponse(this.id))  //TODO: bug in cloud, this shouldn' be id
             .html();
             
     });

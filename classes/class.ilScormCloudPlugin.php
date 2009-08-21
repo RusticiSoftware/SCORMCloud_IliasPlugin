@@ -3,9 +3,9 @@
 include_once("./Services/Repository/classes/class.ilRepositoryObjectPlugin.php");
  
 /**
-* Example repository object plugin
+* SCORM Cloud repository object plugin
 *
-* @author Alex Killing <alex.killing@gmx.de>
+* @author John Hayden <john.hayden@scorm.com>
 * @version $Id$
 *
 */

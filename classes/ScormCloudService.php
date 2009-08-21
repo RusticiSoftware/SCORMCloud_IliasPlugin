@@ -1,7 +1,18 @@
 <?php 
 
+/**
+* SCORM Cloud Service Helper object definition
+*
+* @author John Hayden <john.hayden@scorm.com>
+* @version $Id$
+*
+*/
+
 require_once('./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/SCORM_CLOUD_API/ScormEngineService.php');
 require_once('./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/plugin.php');
+
+// CONSTANTS
+define("SCORE_UNKNOWN", -999);
 
 global $ScormCloudService, $scormcloud_url, $scormcloud_app_id, $scormcloud_secret_key;
 
@@ -17,4 +28,6 @@ if (empty($scormcloud_url) || empty($scormcloud_app_id) || empty($scormcloud_sec
 }
 
 $ScormCloudService = new ScormEngineService($scormcloud_url, $scormcloud_app_id, $scormcloud_secret_key);
+
+
 ?>

@@ -27,3 +27,6 @@ cancel#:#Cancel
 edit#:#Edit
 status#:#Status
 offline#:#Offline
+online#:#Online
+upload_new_package_version#:#Upload New SCORM/AICC .zip
+upload_package#:#Upload SCORM/AICC .zip

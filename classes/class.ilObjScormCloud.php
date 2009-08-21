@@ -1,32 +1,11 @@
 <?php
-/*
-	+-----------------------------------------------------------------------------+
-	| ILIAS open source                                                           |
-	+-----------------------------------------------------------------------------+
-	| Copyright (c) 1998-2009 ILIAS open source, University of Cologne            |
-	|                                                                             |
-	| This program is free software; you can redistribute it and/or               |
-	| modify it under the terms of the GNU General Public License                 |
-	| as published by the Free Software Foundation; either version 2              |
-	| of the License, or (at your option) any later version.                      |
-	|                                                                             |
-	| This program is distributed in the hope that it will be useful,             |
-	| but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-	| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
-	| GNU General Public License for more details.                                |
-	|                                                                             |
-	| You should have received a copy of the GNU General Public License           |
-	| along with this program; if not, write to the Free Software                 |
-	| Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
-	+-----------------------------------------------------------------------------+
-*/
 
 include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 
 /**
-* Application class for example repository object.
+* Application class for SCORM Cloud repository object.
 *
-* @author Alex Killing <alex.killing@gmx.de>
+* @author John Hayden <john.hayden@scorm.com>
 *
 * $Id$
 */
@@ -64,6 +43,12 @@ class ilObjScormCloud extends ilObjectPlugin
 			$ilDB->quote(o, "integer").",".
 			$ilDB->quote(0, "integer").")"
 		);
+		
+		// Don't allow copy/clone of object.  This is now done by simply overridding the scomrcloudgui create() method
+		// and it didn't work for those with Administrator role who see copy/clone regardless
+		//
+		//global $rbacadmin, $rbacreview;
+		//$rbacadmin->deassignOperationFromObject($rbacreview->getTypeId('xscl'), ilRbacReview::_getOperationIdByName("copy"));
 	}
 	
 	/**
@@ -109,6 +94,8 @@ class ilObjScormCloud extends ilObjectPlugin
 		$ilDB->manipulate("DELETE FROM rep_robj_xscl_pkg WHERE ".
 			" id = ".$ilDB->quote($this->getId(), "integer")
 			);
+			
+		//TODO: Remove package (and regs) from the cloud
 		
 	}
 	

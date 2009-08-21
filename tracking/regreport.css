@@ -31,3 +31,28 @@ ul {
 	text-decoration: underline;
 	
 }
+
+.rpt_details 
+{
+	padding: 10px; border: 1px solid gray;
+}
+
+.rpt_objectives 
+{
+	padding-top: 15px;
+	padding-bottom: 10px;
+ float: left;
+ width: 45%;
+}
+
+.rpt_interactions
+{
+	padding-top: 15px;
+	padding-bottom: 10px;
+ float: right;
+ width: 45%;
+}
+
+.true { color: green;}
+.false { color: red;}
+.unknown {color: lightgray;}

@@ -95,6 +95,7 @@ $regFields = array(
 	),
 	'attempt_cnt' => array(
 		'type' => 'integer',
+		'length' => 4,
 		'notnull' => false
 	),
 	'exists_on_cloud' => array(
@@ -105,6 +106,6 @@ $regFields = array(
 );
 
 $ilDB->createTable("rep_robj_xscl_reg", $regFields);
-$ilDB->addPrimaryKey("rep_robj_xscl_reg", array("pkg_id, user_id"));
+$ilDB->addPrimaryKey("rep_robj_xscl_reg", array("pkg_id, usr_id"));
 
 ?>
