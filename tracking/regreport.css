@@ -9,9 +9,7 @@ li {list-style: none; padding: 1px }
 .interactions {margin-left: 10px; margin-top: 10px;}
 .activity-details {margin-left: 10px; padding: 4px; border-top: 1px solid gray; border-bottom: 1px solid gray;}
 
-ul {
 
-}
 #report ul li {
 	border-bottom: 1px solid #ccc;
 	list-style: none;
@@ -28,8 +26,7 @@ ul {
 	cursor: pointer;
 	background-color: #f2f2f2;
 	color: darkblue;
-	text-decoration: underline;
-	
+	text-decoration: underline;	
 }
 
 .rpt_details 
@@ -41,18 +38,19 @@ ul {
 {
 	padding-top: 15px;
 	padding-bottom: 10px;
- float: left;
- width: 45%;
+ 	float: left;
+ 	width: 45%;
 }
 
 .rpt_interactions
 {
 	padding-top: 15px;
 	padding-bottom: 10px;
- float: right;
- width: 45%;
+ 	float: right;
+ 	width: 45%;
 }
 
+/* Color codes for status circles (&bull; bullets) */
 .true { color: green;}
 .false { color: red;}
 .unknown {color: lightgray;}

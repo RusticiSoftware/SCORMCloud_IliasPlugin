@@ -1,3 +1,4 @@
+// Constants
 UNKNOWN = "unknown";
 
 $(document).ready(
@@ -97,11 +98,11 @@ function renderActivity(activity, parent, isFirst, level) {
 		var time = "";
 	}
 
-	// if (hasChildActivities) { 
-	// 	var detailsLink = "";
-	// } else {
-		var detailsLink = "<span style='color: blue; cursor: hand'>details</span>";
-	// }
+	
+	// This is actually a dummy link meant to just give a UI cue since the anywhere on the entire row can be clicked
+	// Thi could perhaps be changed to a downward pointing "open me" kind of arrow.
+	var detailsLink = "<span style='color: blue; cursor: hand'>details</span>";
+	
 
 	var activityRow = '<tr class="tblrow1 summary_row">' +
 		'<td style="padding-left: ' + level*20 + 'px; border-top: 1px solid black;" class="" nowrap="nowrap">' + activity.title + '</td>' +

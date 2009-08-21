@@ -36,6 +36,14 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 	}
 	
 	/**
+	* Get type.
+	*/
+	final function getType()
+	{
+		return "xscl";
+	}
+	
+	/**
 	* Overwritten from ancestor class ilObject2GUI.  Only change made was to comment
 	* out the cloning code.
 	*
@@ -57,19 +65,13 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$this->initEditForm("create", $new_type);
 			$tpl->setContent($this->form->getHTML());
 			
+			// This is the only difference from the original base class create()
 			//$clone_html = $this->fillCloneTemplate('', $new_type);
 			
 			$tpl->setContent($this->form->getHTML().$clone_html);
 		}
 	}
 	
-	/**
-	* Get type.
-	*/
-	final function getType()
-	{
-		return "xscl";
-	}
 	
 	/**
 	* Handles all commmands of this class, centralizes permission checks
@@ -82,8 +84,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			case "editPackageProperties":	
 			case "showTracking":	
 			case "updateProperties":
-			case "editMetadata":
-			case "showLearningProgress":
 			//case "...":
 				$this->checkPermission("write");
 				$this->$cmd();
@@ -113,17 +113,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		return "showContent";
 	}
 	
-	
-	function showLearningProgress() {
-		
-		// global $ilCtrl;
-		// 
-		// include_once './Services/Tracking/classes/class.ilLearningProgressGUI.php';
-		// 
-		// $new_gui =& new ilLearningProgressGUI(LP_MODE_REPOSITORY,$this->object->getRefId());
-		// $ilCtrl->forwardCommand($new_gui);
-		
-	}
+
 
 //
 // DISPLAY TABS
@@ -157,39 +147,16 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$ilTabs->addTab("package_properties", $this->txt("package_properties"), $ilCtrl->getLinkTarget($this, "editPackageProperties"));
 		}
 		
-		// if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
-		// {		
-		// 	$ilTabs->addTab("meta_data", $this->txt("meta_data"), $ilCtrl->getLinkTarget($this, "editMetadata"));
-		// }
-		// 
-		// if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
-		// {		
-		// 	$ilTabs->addTab("learning_progress", $this->txt("learning_progress"), $ilCtrl->getLinkTarget($this, "showLearningProgress"));
-		// }
-		
 		// a "tracking" tab
 		if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
 		{
 			$ilTabs->addTab("tracking", $this->txt("tracking"), $ilCtrl->getLinkTarget($this, "showTracking"));
 		}
 		
-
 		// standard epermission tab
 		$this->addPermissionTab();
 	}
 	
-
-// THE FOLLOWING METHODS IMPLEMENT SOME EXAMPLE COMMANDS WITH COMMON FEATURES
-// YOU MAY REMOVE THEM COMPLETELY AND REPLACE THEM WITH YOUR OWN METHODS.
-
-	// function editMetadata() 
-	// {
-	// 	global $ilTabs, $ilCtrl, $tpl;
-	// 
-	// 	$ilTabs->activateTab("meta_data");		
-	// 	$tpl->setContent("If I can tie into metadata, it'll go HERE");	
-	// }
-
 //
 // Edit properties form
 //
@@ -238,7 +205,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		$this->form->addItem($v);
 		
 		// SCORM PIF
-		
 		if ($this->object->getExistsOnCloud()) 
 		{
 			$uploadTxt = $this->txt("upload_new_package_version");
@@ -288,8 +254,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 	{
 		global $tpl, $lng, $ilCtrl, $ScormCloudService;
 	
-//	echo "<script>alert('" . "NAME: " . $_FILES["scormcloudfile"]["name"] . "');</script>";
-	
 		if ($_FILES["scormcloudfile"]["name"])
 		{
 			// First, process SCORM Cloud upload
@@ -299,11 +263,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			}
 			else
 			{
-				//echo "Upload: " . $_FILES["file"]["name"] . "<br />";
-				//echo "Type: " . $_FILES["file"]["type"] . "<br />";
-				//echo "Size: " . ($_FILES["file"]["size"] / 1024) . " Kb<br />";
-				//echo "Stored in: " . $_FILES["file"]["tmp_name"];
-			
 				$id = $this->object->getId();
 				if ($this->isPackageImportedInScormCloud())
 				{
@@ -322,32 +281,36 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 				// Where the file is going to be placed 
 				$target_path = "uploads/";
 		
-				/* Add the original filename to our target path.  
-				Result is "uploads/filename.extension" */
-		
-				//if ($pifdir = make_upload_directory("$courseid/$CFG->moddata/rscloud")) {
-				//echo $pifdir;
 				$target_path = $_FILES["scormcloudfile"]["tmp_name"] . '.zip'; 
-				//echo $target_path;
 				$tempFile = $_FILES["scormcloudfile"]["tmp_name"];
 		
+				 
 				move_uploaded_file($_FILES['scormcloudfile']['tmp_name'], $target_path);
 		
 				$absoluteFilePathToZip = $target_path;
 		
-				//now upload the file and save the resulting location
-				$location = $uploadService->UploadFile($absoluteFilePathToZip,null);
-		
-				if($mode == 'update')
-				{
-					//version the uploaded course
-					$ir = $courseService->VersionUploadedCourse($courseId, $location, null);
-		
-				}else{
-					//import the uploaded course
-					$ir = $courseService->ImportUploadedCourse($courseId, $location, null);				
-		
+				try {		
+					//now upload the file and save the resulting location
+					$location = $uploadService->UploadFile($absoluteFilePathToZip,null);
+						
+					if($mode == 'update')
+					{
+						//version the uploaded course
+						$ir = $courseService->VersionUploadedCourse($courseId, $location, null);
+						
+					}else{
+						//import the uploaded course
+						$ir = $courseService->ImportUploadedCourse($courseId, $location, null);				
+						
+					}
+				} catch(Exception $e) {
+					// unlink deletes file
+					unlink($absoluteFilePathToZip);
+					throw($e);
 				}
+				
+				// unlink deletes uploaded file
+				unlink($absoluteFilePathToZip);
 				
 				//TODO: Expose and view import result object
 			
@@ -398,26 +361,12 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 						
 						$rbacadmin->grantPermission($guest_role_id, ilRbacReview::_getOperationIdsByName(array("visible")), $ref_id);
 						$rbacadmin->grantPermission($user_role_id, ilRbacReview::_getOperationIdsByName(array("visible","read")), $ref_id);
-						
 					}
 				}
-				
 
-
-			
-				// Process results
-			
-				//this is in an iframe, so refresh the parent window
-				//echo '<script>window.parent.location=window.parent.location;</script>';
-		
-				//}
 			}
-		
-		// Finished with SCORM Cloud import...
 		}
-	
-	
-	
+
 		$this->initPropertiesForm();
 		if ($this->form->checkInput())
 		{
@@ -428,9 +377,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "editProperties");
 		}
-
-
-
 
 		$this->form->setValuesByPost();
 		$tpl->setContent($this->form->getHtml());
@@ -540,9 +486,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			}					
 					
 			$trackingTable .= '</table>';
-			
-
-			
 
 			$tpl->setContent($trackingTable);
 		}
@@ -630,11 +573,6 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			
 			$regStatus = $regService->GetRegistrationResult($reg->getPK(),0,'xml');
 			$statusXml = simplexml_load_string($regStatus);
-	
-			// echo '<p>'.$statusXml->registrationreport->complete;
-			// echo '<p>'.$statusXml->registrationreport->success;
-			// echo '<p>'.$statusXml->registrationreport->totalTime;
-			// echo '<p>'.$statusXml->registrationreport->score;
 			
 			$reg->setCompletion($statusXml->registrationreport->complete);
 			$reg->setSatisfaction($statusXml->registrationreport->success);
@@ -650,8 +588,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$reg->setLastAccess(ilUtil::now());
 			$reg->setAttemptCount($reg->getAttemptCount() + 1);
 			$reg->setVersion($this->object->getVersion());
-			
-			// format with echo date("m/d/y",time())
+
 			$reg->doUpdate();
 		}
 		

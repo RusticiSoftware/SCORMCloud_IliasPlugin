@@ -1,6 +1,10 @@
-
-
 <?php
+/**
+* Sets up the javascript-driven registration details report
+*
+* @author John Hayden <john.hayden@scorm.com>
+*/
+
 	include_once("SCORM_CLOUD_API/ScormEngineService.php");
 
 	$regId = $_GET['regId'];

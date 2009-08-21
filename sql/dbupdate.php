@@ -1,34 +1,6 @@
 <#1>
 <?php
 
-/*
-
-Title and description are in object_data and indexed by obj_id.  Perhaps this obj is our external_Id? This object_data
-table already has created/modfied data.
-
-Odd, same description is also in object_description
-
-pkg.id int 10
-name text 255
-timecreated
-timemodified
-
-Well, do we need ANYTHING other than what the object_data table provides?  Not so sure...
-
-
-
-reg.id int 10
-reg.pkg_id
-userid
-completion
-satisfaction
-score
-total_time
-
-Note that the Third Party Software admin screens save data and when the do so it's saved to teh "settings" table
-
-*/
-
 $pgkFields = array(
 	'id' => array(
 		'type' => 'integer',

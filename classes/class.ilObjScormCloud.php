@@ -43,12 +43,6 @@ class ilObjScormCloud extends ilObjectPlugin
 			$ilDB->quote(o, "integer").",".
 			$ilDB->quote(0, "integer").")"
 		);
-		
-		// Don't allow copy/clone of object.  This is now done by simply overridding the scomrcloudgui create() method
-		// and it didn't work for those with Administrator role who see copy/clone regardless
-		//
-		//global $rbacadmin, $rbacreview;
-		//$rbacadmin->deassignOperationFromObject($rbacreview->getTypeId('xscl'), ilRbacReview::_getOperationIdByName("copy"));
 	}
 	
 	/**
@@ -89,14 +83,19 @@ class ilObjScormCloud extends ilObjectPlugin
 	*/
 	function doDelete()
 	{
+		//TODO: Isn't being called when deleting objects for some reason, looks like
+		// a plug-in bug.  This will leave dormant cloud packages/regs until fixed because
+		// the DeleteCourse() call won't be done.
+		
 		global $ilDB;
+		
+		// TODO: Delete reg data? Or save it for historical purposes?  Don't delete for now...
 		
 		$ilDB->manipulate("DELETE FROM rep_robj_xscl_pkg WHERE ".
 			" id = ".$ilDB->quote($this->getId(), "integer")
 			);
-			
-		//TODO: Remove package (and regs) from the cloud
-		
+
+		$ScormCloudService->getCourseService()->DeleteCourse($this->getId());
 	}
 	
 	/**
