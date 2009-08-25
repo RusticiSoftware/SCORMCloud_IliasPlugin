@@ -281,9 +281,9 @@ class RegistrationService{
 		$request->setMethodParams($params);
         
         $response = $request->CallService("rustici.registration.getLaunchHistory");
-
-		$LaunchInfo = new LaunchInfo(null);
-        $historyArray = $LaunchInfo->ConvertToLaunchInfoList($response);
+	//echo $response;
+		//$LaunchInfo = new LaunchInfo(null);
+        $historyArray = LaunchInfo::ConvertToLaunchInfoList($response);
 		return $historyArray;
     }
 

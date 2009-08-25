@@ -263,4 +263,283 @@ class CourseService{
             return $url;
         }
 }
+/*
+
+    /// <summary>
+    /// Retrieve the list of course attributes associated with this course.  If
+    /// multiple versions of the course exist, the attributes of the latest version
+    /// are returned.
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for the course</param>
+    /// <returns>Dictionary of all attributes associated with this course</returns>
+    public Dictionary<string, string> GetAttributes(string courseId)
+    {
+        return GetAttributes(courseId, Int32.MinValue);
+    }
+
+    /// <summary>
+    /// Retrieve the list of course attributes associated with a specific version
+    /// of the specified course.
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for the course</param>
+    /// <param name="versionId">Specific version the specified course</param>
+    /// <returns>Dictionary of all attributes associated with this course</returns>
+    public Dictionary<string, string> GetAttributes(string courseId, int versionId)
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.Parameters.Add("courseid", courseId);
+        if (versionId != Int32.MinValue)
+            request.Parameters.Add("versionid", versionId);
+        XmlDocument response = request.CallService("rustici.course.getAttributes");
+
+        // Map the response to a dictionary of name/value pairs
+        Dictionary<string, string> attributeDictionary = new Dictionary<string, string>();
+        foreach (XmlElement attrEl in response.GetElementsByTagName("attribute"))
+        {
+            attributeDictionary.Add(attrEl.Attributes["name"].Value, attrEl.Attributes["value"].Value);
+        }
+            
+        return attributeDictionary;
+    }
+
+    /// <summary>
+    /// Update the specified attributes (name/value pairs)
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for the course</param>
+    /// <param name="versionId">Specific version the specified course</param>
+    /// <param name="attributePairs">Map of name/value pairs</param>
+    /// <returns>Dictionary of changed attributes</returns>
+    public Dictionary<string, string> UpdateAttributes(string courseId, int versionId, 
+        Dictionary<string,string> attributePairs)
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.Parameters.Add("courseid", courseId);
+        if (versionId != Int32.MinValue)
+        {
+            request.Parameters.Add("versionid", versionId);
+        }
+            
+        foreach (string key in attributePairs.Keys)
+        {
+            if (!String.IsNullOrEmpty(attributePairs[key]))
+            {
+                request.Parameters.Add(key, attributePairs[key]); 
+            }
+        }
+
+        XmlDocument response = request.CallService("rustici.course.updateAttributes");
+
+        // Map the response to a dictionary of name/value pairs.  This list
+        // should contain only those values that have changed.  If a param was 
+        // specified who's value is the same as the current value, it will not
+        // be included in this list.
+        Dictionary<string, string> attributeDictionary = new Dictionary<string, string>();
+        foreach (XmlElement attrEl in response.GetElementsByTagName("attribute"))
+        {
+            attributeDictionary.Add(attrEl.Attributes["name"].Value, attrEl.Attributes["value"].Value);
+        }
+            
+        return attributeDictionary;
+    }
+
+    /// <summary>
+    /// Update the specified attributes (name/value pairs) for the specified
+    /// course.  If multiple versions of the course exist, only the latest
+    /// version's attributes will be updated.
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for the course</param>
+    /// <param name="attributePairs">Map of name/value pairs</param>
+    /// <returns>Dictionary of changed attributes</returns>
+    public Dictionary<string, string> UpdateAttributes(string courseId, Dictionary<string, string> attributePairs)
+    {
+        return UpdateAttributes(courseId, Int32.MinValue, attributePairs);
+    }
+	
+
+ 
+
+    /// <summary>
+    /// Update course files only.  One or more course files can be updating them by
+    /// including them in a .zip file and sending updates via this method
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for the course</param>
+    /// <param name="versionId">Specific version of the course</param>
+    /// <param name="absoluteFilePathToZip">Full path to the .zip file</param>
+    public void UpdateAssets(string courseId, int versionId, string absoluteFilePathToZip)
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.Parameters.Add("courseid", courseId);
+        if (versionId != Int32.MinValue)
+        {
+            request.Parameters.Add("versionid", versionId);
+        }
+        request.FileToPost = absoluteFilePathToZip;
+        request.CallService("rustici.course.updateAssets");
+    }
+
+    /// <summary>
+    /// Update course files only.  One or more course files can be updating them by
+    /// including them in a .zip file and sending updates via this method.  I
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for the course</param>
+    /// <param name="absoluteFilePathToZip">Full path to the .zip file</param>
+    /// <remarks>If multiple versions of a course exist, only the latest version's assets will
+    /// be updated.</remarks>
+    public void UpdateAssets(string courseId, string absoluteFilePathToZip)
+    {
+        UpdateAssets(courseId, Int32.MinValue, absoluteFilePathToZip);
+    }
+
+    /// <summary>
+    /// Update course files only.  One or more course files can be updating them by
+    /// including them in a .zip file and sending updates via this method.  The
+    /// specified file should already exist in the upload domain space.
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for this course.</param>
+    /// <param name="versionId">Specific version of the course</param>
+    /// <param name="domain">Optional security domain for the file.</param>
+    /// <param name="fileName">Name of the file, including extension.</param>
+    public void UpdateAssetsFromUploadedFile(string courseId, int versionId, string domain, string fileName)
+    {
+        // If null domain id provided, hard-code this to "default"
+        string path = (String.IsNullOrEmpty(domain) ? "default" : domain) + "/" + fileName;
+
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.Parameters.Add("courseid", courseId);
+        if (versionId != Int32.MinValue)
+        {
+            request.Parameters.Add("versionid", versionId);
+        }
+        request.Parameters.Add("path", path);
+        request.CallService("rustici.course.updateAssets");
+    }
+
+    /// <summary>
+    /// Update course files only.  One or more course files can be updating them by
+    /// including them in a .zip file and sending updates via this method.  The
+    /// specified file should already exist in the upload domain space.  
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for this course.</param>
+    /// <param name="domain">Optional security domain for the file.</param>
+    /// <param name="fileName">Name of the file, including extension.</param>
+    /// <remarks>If multiple versions of a course exist, only the latest version's assets will
+    /// be updated.</remarks>
+    public void UpdateAssetsFromUploadedFile(string courseId, string domain, string fileName)
+    {
+        UpdateAssetsFromUploadedFile(courseId, Int32.MinValue, domain, fileName);
+    }
+
+    /// <summary>
+    /// Delete one or more files from the specified course directory
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for this course.</param>
+    /// <param name="versionId">Version ID of the specified course</param>
+    /// <param name="relativeFilePaths">Path of each file to delete realtive to the course root</param>
+    /// <returns>Map of results as a Dictionary of booleans</returns>
+    public Dictionary<string, bool> DeleteFiles(string courseId, int versionId, Collection<string> relativeFilePaths)
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.Parameters.Add("courseid", courseId);
+        if (versionId != Int32.MinValue)
+        {
+            request.Parameters.Add("versionid", versionId);
+        }
+
+        foreach (string fileName in relativeFilePaths)
+        {
+            request.Parameters.Add("path", fileName);
+        }
+
+        XmlDocument response = request.CallService("rustici.course.deleteFiles");
+
+        Dictionary<string, bool> resultsMap = new Dictionary<string, bool>();
+        foreach (XmlElement attrEl in response.GetElementsByTagName("result"))
+        {
+            resultsMap.Add(attrEl.Attributes["path"].Value, 
+                Convert.ToBoolean(attrEl.Attributes["deleted"].Value));
+        }
+
+        return resultsMap;
+    }
+
+    /// <summary>
+    /// Delete one or more files from the specified course directory. 
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for this course.</param>
+    /// <param name="relativeFilePaths">Path of each file to delete realtive to the course root</param>
+    /// <returns>Map of results as a Dictionary of booleans</returns>
+    /// <remarks>If  multiple versions of a course exist, only files from the latest version
+    /// will be deleted.</remarks>
+    public Dictionary<string, bool> DeleteFiles(string courseId, Collection<string> relativeFilePaths)
+    {
+        return DeleteFiles(courseId, Int32.MinValue, relativeFilePaths);
+    }
+	
+
+    /// <summary>
+    /// Get the file structure of the given course.
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for this course.</param>
+    /// <param name="versionId">Version ID of the specified course</param>
+    /// <returns>XML String of the hierarchical file structure of the course</returns>
+    public string GetFileStructure(string courseId, int versionId)
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.Parameters.Add("courseid", courseId);
+        if (versionId != Int32.MinValue)
+        {
+            request.Parameters.Add("versionid", versionId);
+        }
+        XmlDocument response = request.CallService("rustici.course.getFileStructure");
+        
+        // Return the subset of the xml starting with the top <dir>
+        return response.ChildNodes[1].InnerXml;
+    }
+
+    /// <summary>
+    /// Get the file structure of the given course.
+    /// </summary>
+    /// <param name="courseId">Unique Identifier for this course.</param>
+    /// <returns>XML String of the hierarchical file structure of the course</returns>
+    /// <remarks>If multiple versions of the course exist, the latest version's
+    /// files structure will be retured.</remarks>
+    public string GetFileStructure(string courseId)
+    {
+        return GetFileStructure(courseId, Int32.MinValue);
+    }
+
+   
+    /// <summary>
+    /// Get the url that points directly to a course asset
+    /// </summary>
+    /// <param name="courseId">Unique Course Identifier</param>
+    /// <param name="path">Path to asset from root of course</param>
+    /// <param name="versionId">Specific Version</param>
+    /// <returns>HTTP Url to Asset</returns>
+    public String GetAssetUrl(String courseId, String path, int versionId)
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.Parameters.Add("courseid", courseId);
+        request.Parameters.Add("path", path);
+        if (versionId != Int32.MinValue)
+        {
+            request.Parameters.Add("versionid", versionId);
+        }
+
+        return request.ConstructUrl("rustici.course.getAssets");
+    }
+
+    /// <summary>
+    /// Get the url that points directly to a course asset
+    /// </summary>
+    /// <param name="courseId">Unique Course Identifier</param>
+    /// <param name="path">Path to asset from root of course</param>
+    /// <returns>HTTP Url to Asset</returns>
+    public String GetAssetUrl(String courseId, String path)
+    {
+        return GetAssetUrl(courseId, path, Int32.MinValue);
+    }
+
+
+*/
 ?>

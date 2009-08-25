@@ -1,4 +1,4 @@
-<?php
+fi<?php
 
  /// <summary>
     /// Data class to hold high-level Launch Info
@@ -22,7 +22,8 @@ class LaunchInfo
         /// <param name="launchInfoElem"></param>
         public function __construct($xml)
         {
-			$this->_id = $xml->id;
+	    //echo $xml.'<br/>';
+	    $this->_id = $xml['id'];
             $this->_completion = $xml->completion;
             $this->_satisfaction = $xml->satisfaction;
             $this->_measureStatus = $xml->measure_status;

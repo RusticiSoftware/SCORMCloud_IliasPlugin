@@ -38,10 +38,11 @@ class ilObjScormCloud extends ilObjectPlugin
 		global $ilDB;
 		
 		$ilDB->manipulate("INSERT INTO rep_robj_xscl_pkg ".
-			"(id, is_online, version) VALUES (".
+			"(id, is_online, version, learners_see_rpt_details) VALUES (".
 			$ilDB->quote($this->getId(), "integer").",".
 			$ilDB->quote(o, "integer").",".
-			$ilDB->quote(0, "integer").")"
+			$ilDB->quote(0, "integer").")".
+			$ilDB->quote(1, "integer").")"
 		);
 	}
 	
@@ -60,6 +61,8 @@ class ilObjScormCloud extends ilObjectPlugin
 			$this->setOnline($rec["is_online"]);
 			$this->setExistsOnCloud($rec["exists_on_cloud"]);
 			$this->setVersion($rec["version"]);
+			$this->setLearnersSeeRptDetails($rec["learners_see_rpt_details"]);
+			$this->setEstimatedDuration($rec["estimated_duration"]);
 		}
 	}
 	
@@ -73,6 +76,8 @@ class ilObjScormCloud extends ilObjectPlugin
 		$ilDB->manipulate($up = "UPDATE rep_robj_xscl_pkg SET ".
 			" is_online = ".$ilDB->quote($this->getOnline(), "integer").",".
 			" version = ".$ilDB->quote($this->getVersion(), "integer").",".
+			" estimated_duration = ".$ilDB->quote($this->getEstimatedDuration(), "text").",".
+			" learners_see_rpt_details = ".$ilDB->quote($this->getLearnersSeeRptDetails(), "integer").",".
 			" exists_on_cloud = ".$ilDB->quote($this->getExistsOnCloud(), "integer").
 			" WHERE id = ".$ilDB->quote($this->getId(), "integer")
 			);
@@ -108,6 +113,8 @@ class ilObjScormCloud extends ilObjectPlugin
 		$new_obj->setOnline($this->getOnline());
 		$new_obj->setVersion($this->getVersion());
 		$new_obj->setExistsOnCloud($this->getExistsOnCloud());
+		$new_obj->setEstimatedDuration($this->getEstimatedDuration());
+		$new_obj->setLearnersSeeRptDetails($this->getLearnersSeeRptDetails());
 		$new_obj->update();
 	}
 	
@@ -155,24 +162,34 @@ class ilObjScormCloud extends ilObjectPlugin
 		return $this->version;
 	}
 	
-	/**
-	* Set existsOnCloud
-	*
-	* @param	boolean		online
-	*/
 	function setExistsOnCloud($a_val)
 	{
 		$this->existsOnCloud = $a_val;
 	}
-	
-	/**
-	* Get existsOnCloud
-	*
-	* @return	boolean		online
-	*/
+
 	function getExistsOnCloud()
 	{
 		return $this->existsOnCloud;
+	}
+	
+	function setEstimatedDuration($a_val)
+	{
+		$this->estimatedDuration = $a_val;
+	}
+
+	function getEstimatedDuration()
+	{
+		return $this->estimatedDuration;
+	}	
+
+	function setLearnersSeeRptDetails($a_val)
+	{
+		$this->learnersSeeRptDetails = $a_val;
+	}
+	
+	function getLearnersSeeRptDetails()
+	{
+		return $this->learnersSeeRptDetails;
 	}
 
 }

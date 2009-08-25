@@ -200,6 +200,10 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		$cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
 		$this->form->addItem($cb);
 		
+		// online
+		$rd = new ilCheckboxInputGUI($this->lng->txt("learners_see_rpt_details"), "learners_see_rpt_details");
+		$this->form->addItem($rd);
+		
 		// version
 		$v = new ilNonEditableValueGUI($this->lng->txt("version"), "version");
 		$this->form->addItem($v);
@@ -243,6 +247,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		$values["desc"] = $this->object->getDescription();
 		$values["online"] = $this->object->getOnline();
 		$values["version"] = $this->object->getVersion();
+		$values["learners_see_rpt_details"] = $this->object->getLearnersSeeRptDetails();
 		
 		$this->form->setValuesByArray($values);
 	}
@@ -277,7 +282,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 				$uploadService = $ScormCloudService->getUploadService();
 		
 				$courseId = $id;
-				//echo '$courseId='.$courseId.'<br>';
+
 				// Where the file is going to be placed 
 				$target_path = "uploads/";
 		
@@ -334,9 +339,14 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 					{
 						if($course->getCourseId() == $this->object->getId())
 						{
-							$xmlstring = $courseService->GetMetadata($courseid, 0, 1, null,'xml');
+
+
 							$courseTitle = $course->getTitle();
 							$versionCount = $course->getNumberOfVersions();
+
+							$xmlstring = $courseService->GetMetadata($courseId, $versionCount-1, 0, 'xml');
+								
+							error_log("xmlString : ".$xmlstring);
 							
 							$this->object->setTitle($courseTitle);
 							$this->object->setExistsOnCloud(true);
@@ -373,6 +383,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			//$this->object->setTitle($this->form->getInput("title"));
 			$this->object->setDescription($this->form->getInput("desc"));
 			$this->object->setOnline($this->form->getInput("online"));
+			$this->object->setLearnersSeeRptDetails($this->form->getInput("learners_see_rpt_details"));
 			$this->object->update();		
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "editProperties");
@@ -500,7 +511,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			$tpl->setContent($this->getTrackingReportHtml($regId));
 		}
 		
-		function getTrackingReportHtml($regId, $showTitle = true) {
+		function getTrackingReportHtml($regId, $showDetails = true, $showTitle = true) {
 			
 			global $tpl, $ScormCloudService;
 
@@ -539,7 +550,9 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			}
 			// The javascript report will render all activities			
 			
-			return $stylesheetLink.$tableHeader.'<div dataUrl="'.$dataUrl.'" id="report"/>';
+			
+			
+			return $stylesheetLink.$tableHeader.'<div showDetails="'.$showDetails.'" dataUrl="'.$dataUrl.'" id="report"/>';
 			
 		}
 
@@ -631,16 +644,25 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		} else {
 			$status = $reg->getSatisfaction();
 		}
-		
-		$tableHeader = '<table style="width: 100%" class="fullwidth">'.
-				'<tr class="tbltitle">'.
-					'<th class="std">'.$this->object->getTitle().'</th>'.
-					'<th align="right" style="text-align: right" class="std"><strong>Learner: </strong>'.$ilias->account->getFirstName().' '.$ilias->account->getLastName().'</th>'.
-				'</tr></table>';
-		
+
 		$currentUrl .= $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
 		$returnUrl = $currentUrl."&refreshRegStatus=true";
 		$launchHref = $regService->GetLaunchUrl($reg->getPK(), $returnUrl);
+
+		$launchButton = "<button style='cursor: hand; font-size: 110%; width: 125px' type='button' onclick='window.location=\"".$launchHref."\";'> Launch </button>";
+		$launchString .= "<div style='margin: 10px; width: 100%; text-align: center'".$launchButton."</div>";
+
+		
+		$tableHeader = '<table style="width: 100%" class="fullwidth">'.
+				// '<tr class="tbltitle">'.
+				// 	'<th class="std">'.$this->object->getTitle().'</th>'.
+				// 	'<th align="right" style="text-align: right" class="std"><strong>Learner: </strong>'.$ilias->account->getFirstName().' '.$ilias->account->getLastName().'</th>'.
+				// '</tr>'.
+				'<tr class="tbltitle">'.
+					'<td class="std" style="border: none; font-size: 90%">'.$this->object->getDescription()."</td>".	
+					'<td align="right" style="border: none">'.$launchButton.'</td>';
+				'</tr></table>';
+	
 
 
 		$launchString = "<table cellspacing=0 cellpadding=0 style='width: 100%; margin: 20px; margin-top: 10px'>".
@@ -653,14 +675,16 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			"</td><td>&nbsp;</td></tr>".
 			"</table>";
 
-		$launchString .= "<div style='margin: 10px; width: 100%; text-align: center'<button style='cursor: hand; font-size: 110%; width: 125px' type='button' onclick='window.location=\"".$launchHref."\";'> Launch </button></div>";
-			
+		//$this->showHistoryReport($reg->getPK());
 		
 		
 		// '<td class="std">'.$reg->getLastAccess().'</td>'.
 		// '<td class="std">'.$reg->getAttemptCount().'</td>'.
 		// 
-		$tpl->setContent($tableHeader.$launchString.$this->getTrackingReportHtml($reg->getPK(), false));
+		$tpl->setContent($tableHeader.$launchString.$this->getTrackingReportHtml($reg->getPK(), $this->object->getLearnersSeeRptDetails(), false));
+		// $tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/jquery.js");
+		// $tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/LaunchHistoryControlResources/scripts/LaunchHistoryReport.js");
+		// $tpl->setContent($this->showHistoryReport($reg->getPK()));
 	}
 	
 	
@@ -694,5 +718,123 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		return $time;
 	}	
 	
+	function showHistoryReport($regId) {
+		
+		global $ScormCloudService;
+		
+		$html = '
+		<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+		<script type="text/javascript">
+		    $(document).ready(function(){
+
+		    });
+		    </script>
+		<script type="text/javascript">
+		        var extConfigurationString = "";
+		        var reportsHelperUrl = "Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/LaunchHistoryHelper.php";
+		    </script>
+		<link rel="Stylesheet" href="Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/LaunchHistoryControlResources/styles/LaunchHistoryReport.css"  type="text/css"/>
+		<style>
+
+		#column_headers {position:relative; font-weight:bold; border-bottom:1px solid #4171B5; padding: 3px 0px; margin-top:20px;}
+		.headerLaunchTime {position:relative; width:300px; font-size:110%;}
+		.headerExitTime {position:absolute; top:3px; left:200px; font-size:110%;}
+		.headerDuration {position:absolute; top:3px; left:400px; font-size:110%;}
+		.headerSatisfaction {position:absolute; top:3px; left:525px; font-size:110%;}
+		.headerCompletion {position:absolute; top:3px; left:650px; font-size:110%;}
+
+
+		.activityReportHeader {font-size:150%; position:relative;}
+		.launchHistoryLink {position:absolute; right:25px; top:0px;}
+		.launchHistoryLink img {margin-right:10px; vertical-align:top;}
+
+		td.launch_headerName {
+		color:#0077CC;
+		font-size:120%;
+		font-weight:bold;
+		padding-bottom:0;
+		width:154px;
+		}
+		td.launch_index {width:120px;}
+
+		#historyInfo {margin-top:10px; margin-left:50px;}
+
+		.instance_info_reg_fields_title, .score_fields_title {font-size:90%;}
+		.info_label {font-size:90%;}
+
+		</style>';
+
+		$html .= '<div class ="actions"><div align="left" style="float:left;margin-top:2px;" ><strong>'.$_course['title'].' - '.$lp_title.' - '.$name.'</strong></div>';
+		$html .=	'<div class="clear"></div></div>';
+
+		$html .= "<div class='activityReportHeader'>".$this->lng->txt('launchHistoryReport');
+		//$html .= '<div class="launchHistoryLink"><a href="cloudCourseDetails.php?regid='.$regid.'&course='.$cidReq.'&lp_id='.$lp_id.'&student_id='.$user_id.'"><img src="img/2leftarrow.gif"/>'.$this->lng->txt('cloudCourseDetails').'</a></div></div>';
+
+		$regService = $ScormCloudService->getRegistrationService();
+
+		$resultArray = $regService->GetLaunchHistory($regId);
+
+		$html .= '<div id="historyInfo">';
+			$html .= "<table>";
+			$html .= "<tr><td class='launch_headerName' colspan='2'>Launch Instances</td>";
+			$html .= "<td class='launch_time'>Launch Time</td>";
+			$html .= "<td class='launch_duration'>Duration</td></tr></table>";
+			$html .= '<div id="historyDetails" class="history_details" runat="server">';
+
+		$html .= "<div class='launch_list'>";
+		$idx = 1;
+		foreach($resultArray as $result)
+		{
+		$lid = 	$result->getId();
+
+		$html .= "<div class='LaunchPlaceHolder' id='launch_".$result->getId()."' regid='".$regid."'>";
+
+		$html .= "<div class='hide_show_div' >";
+			$html .= "<table>";
+			$html .= "<tr><td class='launch_listPrefix'>+</td>";
+			$html .= "<td class='launch_index'>".$idx.".</td>";
+			$html .= "<td class='launch_time'>".$this->cloud_formatHistoryTime($result->getLaunchTime())."</td>";
+			$html .= "<td class='launch_duration'><script>document.write(fmtDuration(".($this->cloud_convertTimeToInt($result->getExitTime()) - $this->cloud_convertTimeToInt($result->getLaunchTime()))* 1000 ."))</script></td>";
+			$html .= "</tr></table>";
+		$html .= "</div>";
+
+		$html .= "<div class='launch_activity_list'><div id='receiver' class='div_receiver'></div></div>";
+		$html .= "</div>";
+
+		$idx++;
+		}
+		$html .= "  </div>";
+		$html .= '</div></div>';
+		
+		return $html;
+		
+	}
+
+	function cloud_formatHistoryTime($timestr){
+		//2009-08-19T18:41:33.257+0000
+		$dt = substr($timestr,5,2).'/'.substr($timestr,8,2).'/'.substr($timestr,0,4);
+		$hr = (int)substr($timestr,11,2);
+		if ($hr < 12){
+			$suf = "AM";
+		} else {
+			$hr -= 12;
+			$suf = "PM";
+		}
+		$min = substr($timestr,14,2);
+		$sec = substr($timestr,17,2);
+
+		return $dt.' '.$hr.':'.$min.':'.$sec.' '.$suf;
+	}
+	
+	//input format 2009-08-11T19:01:50.081+0000 
+	function cloud_convertTimeToInt($str){
+		//echo 'hour: '.substr($str,11,2).'<br/>';
+		//echo 'minute: '.substr($str,14,2).'<br/>';
+		return mktime(substr($str,11,2),substr($str,14,2),substr($str,17,2),substr($str,5,2),substr($str,8,2), substr($str,0,4));
+	}
+	
+	
 }
+
+
 ?>

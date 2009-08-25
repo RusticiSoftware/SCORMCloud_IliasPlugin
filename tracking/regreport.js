@@ -40,19 +40,22 @@ function getRegistrationResultCallback(data) {
 
 		renderActivity(data.rsp.registrationreport.activity, $('#report'), true, 0);
 
-		$('.summary_row').click(function() {
-			$(this).next().toggle();
-			return false;
-		}).next().hide();
+		if ($('#report').attr('showDetails') == "1") {
+			$('.summary_row').click(function() {
+				$(this).next().toggle();
+				return false;
+			}).next().hide();
+	
 		
-		$(function() {
-	        $('.summary_row').hover(function() {
-	            $(this).css('background-color', '#E9EFFD');
-	        },
-	        function() {
-	            $(this).css('background-color', 'white');
-	        });
-	    });
+			$(function() {
+		        $('.summary_row').hover(function() {
+		            $(this).css('background-color', '#E9EFFD');
+		        },
+		        function() {
+		            $(this).css('background-color', 'white');
+		        });
+		    });
+		}
 	  
 }
 
@@ -101,8 +104,11 @@ function renderActivity(activity, parent, isFirst, level) {
 	
 	// This is actually a dummy link meant to just give a UI cue since the anywhere on the entire row can be clicked
 	// Thi could perhaps be changed to a downward pointing "open me" kind of arrow.
-	var detailsLink = "<span style='color: blue; cursor: hand'>details</span>";
-	var detailsLink = '<img border="0" style="vertical-align: middle;" src="./templates/default/images/asc_order.gif"/><img border="0" style="margin-left: 1px;vertical-align: middle;" src="./templates/default/images/asc_order.gif"/>';
+	if ($('#report').attr('showDetails') == "1") {
+		var detailsLink = '<img border="0" style="vertical-align: middle;" src="./templates/default/images/asc_order.gif"/><img border="0" style="margin-left: 1px;vertical-align: middle;" src="./templates/default/images/asc_order.gif"/>';
+		} else {
+			var detailsLink = "<span></span>";
+		}
 	
 
 	var activityRow = '<tr class="tblrow1 summary_row">' +
@@ -127,7 +133,7 @@ function renderActivity(activity, parent, isFirst, level) {
 	
 	var detailsDiv = $("<div>");
 	var objectivesDiv = $("<div style='width: 50%' class='rpt_objectives' id='objectives_" + activity.id + "'><div style='font-size: 90%; font-weight: bold'>Objectives</div></div>");
-	var interactionsDiv = $("<div style='width: 50%' class='rpt_interactions' id='interactions_" + activity.id + "'><div style='font-size: 90%; font-weight: bold'>Interactions</div></div>");
+	var interactionsDiv = $("<div style='width: 50%' class='rpt_interactions' id='interactions_" + activity.id + "'><div style='font-size: 90%; font-weight: bold'>Questions/Answers</div></div>");
 	
 	objectivesDiv.appendTo(detailsDiv);
 	interactionsDiv.appendTo(detailsDiv);
@@ -148,7 +154,9 @@ function renderActivity(activity, parent, isFirst, level) {
 	// Put the details into a slot within the table
 	var details = $('<tr class="detail_row"><td style="padding-left: ' + level*20 + 'px;" colspan=6>' + detailsDiv.html() + '</td></tr>');
 
-	$(details).appendTo($('#regtable'));
+	if ($('#report').attr('showDetails') == "1") {
+		$(details).appendTo($('#regtable'));
+	}
 
 	if (activity.children) {
 		$(activity.children.activity).each(function() {
@@ -170,7 +178,7 @@ function fmtInteractions(interactions) {
 
 		result += "<li class='interaction'>";
 		result += "<span style='font-size: 150%' class='" + this.result + "'>&bull;</span> " + this.id +
-		 ". answered <strong>" + fmtResponse(this.learner_response) + "</strong>";
+		 ". Question: " + this.description + ". Answered <strong>" + fmtResponse(this.learner_response) + "</strong>";
 		if (this.result == "correct") {
 			result += ".";
 		} else {
@@ -192,26 +200,32 @@ function fmtObjectives(objectives) {
         return "";
     }   
 
-    var result = "";
+    var result = "<span></span>";
 
     $(objectives.objective).each(function(index) {
-      
-        temp_ul = $('<ul style="margin-top: 5px">')
-                .append(fmtListItem('Id', this.id))
-                .append(fmtListItem('Measure Status', this.measurestatus));
-        if(this.measurestatus){
-            temp_ul.append(fmtListItem('Normalized Measure', this.normalizedmeasure));
-        }
-        else{
-            temp_ul.append(fmtListItem('Normalized Measure', UNKNOWN));
-        }
-        temp_ul.append(fmtListItem('Progress Measure', this.progressstatus))
-                .append(fmtListItem('Satisfied Status', this.satisfiedstatus));
-        result = result + '<li style="margin-top: 5px">' +
-            $('<li>')
-            .append(index > 0 ? 'Secondary Objective ' + index : "Primary Objective")
-            .append(temp_ul)
-            .html() +  '</li>';
+
+		// If it has no ID its an internal primary objective
+		// that has little value when displayed because it's values
+		// are tied to the main activity data.
+		if (this.id.length > 0)
+	    {
+	        temp_ul = $('<ul style="margin-top: 5px">')
+	                //.append(fmtListItem('Id', this.id))
+	                .append(fmtListItem('Measure Status', this.measurestatus));
+	        if(this.measurestatus){
+	            temp_ul.append(fmtListItem('Normalized Measure', this.normalizedmeasure));
+	        }
+	        else{
+	            temp_ul.append(fmtListItem('Normalized Measure', UNKNOWN));
+	        }
+	        temp_ul.append(fmtListItem('Progress Measure', this.progressstatus))
+	                .append(fmtListItem('Satisfied Status', this.satisfiedstatus));
+	        result = result + '<li style="margin-top: 5px">' +
+	            $('<li>')
+	            .append("<strong>&bull; " + this.id + "</strong>")
+	            .append(temp_ul)
+	            .html() +  '</li>';
+		}
     });
   
     return result;

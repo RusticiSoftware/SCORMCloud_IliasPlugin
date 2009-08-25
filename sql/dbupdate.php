@@ -21,6 +21,16 @@ $pgkFields = array(
 		'type' => 'integer',
 		'length' => 2,
 		'notnull' => false
+	),
+	'learners_see_rpt_details' => array(
+		'type' => 'integer',
+		'length' => 1,
+		'notnull' => false
+	),
+	'estimated_duration' => array(
+		'type' => 'text',
+		'length' => 10,
+		'notnull' => false
 	)
 );
 
