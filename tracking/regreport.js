@@ -113,8 +113,8 @@ function renderActivity(activity, parent, isFirst, level) {
 
 	var activityRow = '<tr class="tblrow1 summary_row">' +
 		'<td style="padding-left: ' + level*20 + 'px; border-top: 1px solid black;" class="" nowrap="nowrap">' + activity.title + '</td>' +
-		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + "<span style='font-size: 175%' class='" + completed + "'>&bull;</span> " + '</td>' +
-		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + "<span style='font-size: 175%' class='" + satisfied + "'>&bull;</span> " + '</td>' +
+		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + getBooleanImage(completed) + '</td>' +
+		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + getBooleanImage(satisfied) + '</td>' +
 		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + time + '</td>' +
 		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + score + '</td>' +
 		'<td style="border-top: 1px solid black;" class="" nowrap="nowrap">' + detailsLink + '</td>' +
@@ -268,6 +268,21 @@ function fmtCorrectResponses(correctResponses) {
     });
 
     return result;
+}
+
+function getBooleanImage(status) {
+
+	status = status.toString().toLowerCase();
+	var img = "<img border=0 src='./templates/default/images/question_placeholder_thumb.png' />";
+
+	if (status == "true") {
+		img = "<img border=0 src='./templates/default/images/crs_accomplished.gif' />";
+	}
+	else if (status == "false") {
+		img = "<img border=0 src='./templates/default/images/crs_not_accomplished.gif' />";
+	}
+
+	return img;
 }
 
 
