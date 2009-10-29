@@ -425,10 +425,14 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 			
 			$courseService = $ScormCloudService->getCourseService();
 			$pkgPropertyEditorUrl = $courseService->GetPropertyEditorUrl($this->object->getId(), $stylesheet);
+			    
+			$usageLink="<button onclick=\"$('#usage').toggle();\" type=\"button\">SCORM Cloud Usage Statistics</button><br><br><div id=\"usage\" style=\"display: none;\"><iframe frameborder=\"0\" src='https://accounts.scorm.com/scorm-cloud-manager/public/usage-meter?appId=".$ScormCloudService->getAppId()."' style='width:100%;height:400px;'></iframe></div>";
 			
-			$iframe = "<iframe frameborder='0' src='".$pkgPropertyEditorUrl."' style='width:100%;height:600px;'> </iframe>";
-			
-			$tpl->setContent($iframe);
+			$iframe = "<iframe frameborder='0' src='".$pkgPropertyEditorUrl."' style='width:100%;height:600px;'> </iframe>";  
+			//$iframe2 = "<iframe frameborder='0' src='https://accounts.scorm.com/scorm-cloud-manager/public/usage-meter?appId=".$ScormCloudService->getAppId()."' style='width:100%;height:600px;'> </iframe>";  
+	 
+			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/jquery.js");   
+			$tpl->setContent($iframe.$usageLink);
 		}
 
 

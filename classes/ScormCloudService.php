@@ -20,8 +20,9 @@ if (empty($scormcloud_url) || empty($scormcloud_app_id) || empty($scormcloud_sec
 	$msg = "<h3 style='color: red; margin-top: 50px'>SCORM Cloud Learning Module Not Configured</h3>".
 	"<p>To use the SCORM Cloud Learning Module Plug-in you must first configure the url, ".
 	"application ID and secret key in the plugin.php configuration file ([ilias root]/Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/plugin.php).".
-	"<p>A free, basic-level application id can be requested from <a href='http://www.scorm.com'>www.scorm.com</a> for development/demo purposes.";
-	
+	//"<p>A free application id can be requested from <a href='http://www.scorm.com'>www.scorm.com</a> for development/demo purposes.".
+	"<iframe frameborder=0 src ='https://accounts.scorm.com/scorm-cloud-manager/public/signup-embedded?cssurl=".urlencode("Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/scormcloud.css")."' width='100%' height='500' />";
+	     
 	// back button
 	$msg .= '<div style="width: 100%; text-align: center"><button onclick="javascript: history.go(-1)">back</button></div>';
 	
