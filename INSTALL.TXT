@@ -1,0 +1,35 @@
+SCORM Cloud plug-in for Ilias 4 
+
+Installation Instructions
+=========================
+
+Step 1
+------
+Unzip scormcloud-plugin-ilias4.zip to the root of your Ilias deployment. The root Ilias directory contains such files as 'ilias.ini.php' and 'login.php'. If you have already unzipped the files elsewhere, simply copy the directory into the root Ilias directory.
+
+Step 2
+------
+Visit the following URL to obtain a SCORM Cloud application ID: https://accounts.scorm.com/scorm-cloud-manager/public/signup-embedded. You will receive an application ID and secret key via email.  
+
+Step 3
+------
+Enter your new application ID/key info into the plugin.php file located in <ILIAS-ROOT>/Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud
+
+Example lines to edit in plugin.php:
+
+  $scormcloud_app_id = 'myappid';
+  $scormcloud_secret_key = '234qafasdf235Sgq3asdfdf43';  
+
+Step 4
+------
+Register the plug-in with Ilias by logging on as and Administrator or 'root' and doing the following:        
+
+- Navigate to Adminstration -> Modules, Services and Plugins
+- Choose the "Services" tab
+- Select "show details" for the Repository Service
+- Click the "Update" link for the ScormCloud Plugin
+- Click the "Activate" link for the ScormCloud Plugin
+
+
+That's it!  To make use of the new SCORM Cloud repository type go into the Repository section of the site and click "+ Add New Item".  Note that "Learning Module SCORM Cloud" now shows up as an option.
+
