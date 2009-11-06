@@ -40,8 +40,8 @@ class ilObjScormCloud extends ilObjectPlugin
 		$ilDB->manipulate("INSERT INTO rep_robj_xscl_pkg ".
 			"(id, is_online, version, learners_see_rpt_details) VALUES (".
 			$ilDB->quote($this->getId(), "integer").",".
-			$ilDB->quote(o, "integer").",".
-			$ilDB->quote(0, "integer").")".
+			$ilDB->quote(0, "integer").",".
+			$ilDB->quote(0, "integer").",".
 			$ilDB->quote(1, "integer").")"
 		);
 	}

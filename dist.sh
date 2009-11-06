@@ -7,5 +7,5 @@ cp -r . ../build/Customizing/global/plugins/Services/Repository/RepositoryObject
 rm -f ../dist/scormcloud-plugin-ilias4.zip
 cd ../build
 rm -f ../ScormCloud/scormcloud-plugin-ilias4.zip
-zip -r ../ScormCloud/scormcloud-plugin-ilias4.zip * -x \*/.svn/* -x \*dist.sh -x \*/todo.txt
+zip -r ../ScormCloud/scormcloud-plugin-ilias4.zip * -x \*/.svn/* -x \*dist.sh -x \*/todo.txt -x \*/*.zip   
 rm -rf ../build

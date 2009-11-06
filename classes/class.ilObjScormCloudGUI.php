@@ -200,8 +200,9 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		$cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
 		$this->form->addItem($cb);
 		
-		// online
-		$rd = new ilCheckboxInputGUI($this->lng->txt("learners_see_rpt_details"), "learners_see_rpt_details");
+		// online 
+		//$rd = new ilCheckboxInputGUI($this->lng->txt("learners_see_rpt_details"), "learners_see_rpt_details");   
+		$rd = new ilCheckboxInputGUI("Learners See Report Details", "learners_see_rpt_details");
 		$this->form->addItem($rd);
 		
 		// version
