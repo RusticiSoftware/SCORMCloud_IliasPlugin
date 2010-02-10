@@ -22,8 +22,7 @@ class LaunchInfo
         /// <param name="launchInfoElem"></param>
         public function __construct($xml)
         {
-	    //echo $xml.'<br/>';
-	    $this->_id = $xml['id'];
+			$this->_id = $xml['id'];
             $this->_completion = $xml->completion;
             $this->_satisfaction = $xml->satisfaction;
             $this->_measureStatus = $xml->measure_status;
@@ -130,8 +129,8 @@ class LaunchInfo
 			if($xml = simplexml_load_string($xmlDoc))
 			{
 		            foreach ($xml->launchhistory->launch as $launch)
-		            {						
-		                $allResults[] = new LaunchInfo($launch);
+		            {
+                        $allResults[] = new LaunchInfo($launch);
 		            }
 			}else{
 				echo 'error loading $xmlDoc';

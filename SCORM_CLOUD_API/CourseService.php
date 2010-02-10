@@ -227,7 +227,7 @@ class CourseService{
         /// with the provided url as the src.  This can be used to simulate an "onload"
         /// by using a notificationFrameUrl that's the same domain as the host system and
         /// calling parent.parent.method()</param>
-        public function GetPropertyEditorUrl($courseId, $stylesheetUrl, $notificationFrameUrl)
+        public function GetPropertyEditorUrl($courseId, $stylesheetUrl, $notificationFrameUrl = null)
         {
             // The local parameter map just contains method methodParameters.  We'll
             // now create a complete parameter map that contains the web-service

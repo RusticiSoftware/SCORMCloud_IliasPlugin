@@ -457,13 +457,12 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		*/
 		function showTrackingMain()
 		{
-			global $tpl, $ilias;
+			global $tpl, $ilias, $ScormCloudService;;
 
 			$userId = $ilias->account->getId();
 			$pkgId = $this->object->getId();
 
-			$reg = new ilObjScormCloudReg();
-			$regs = $reg->GetRegistrationsForPackageId($pkgId);
+			$regs = ilObjScormCloudReg::GetRegistrationsForPackageId($pkgId);
 			
 			if (!empty($_SERVER['HTTPS'])) {
 				$currentUrl = "https://";
@@ -501,9 +500,83 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 					'</tr>';
 			}					
 					
-			$trackingTable .= '</table>';
+			$trackingTable .= '</table>';   
+			                                            
+			$tpl->addJavaScript("./Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/jquery.js");   
+			$tpl->addJavaScript("http://cloud.scorm.com/Reportage/scripts/reportage.combined.nojquery.js");      
+			
+			// Reportage Report for all learners taking this course
+			$rptService = $ScormCloudService->getReportingService(); 
+			$rptAuth = $rptService->GetReportageAuth('FREENAV',true);
+			
+			$summaryWidgetSettings = new WidgetSettings();
+			$summaryWidgetSettings->setShowTitle(true);
+			$summaryWidgetSettings->setScriptBased(true);
+			$summaryWidgetSettings->setEmbedded(true);
+			$summaryWidgetSettings->setExpand(true);
+			$summaryWidgetSettings->setDivname('summary');          
+			$summaryWidgetSettings->setCourseId($pkgId);            
+			
+			$learnersWidgetSettings = new WidgetSettings();
+			$learnersWidgetSettings->setShowTitle(true);
+			$learnersWidgetSettings->setScriptBased(true);
+			$learnersWidgetSettings->setEmbedded(true);
+			$learnersWidgetSettings->setExpand(true);
+			$learnersWidgetSettings->setDivname('learners');          
+			$learnersWidgetSettings->setCourseId($pkgId);
+			
+			$activitiesWidgetSettings = new WidgetSettings();
+			$activitiesWidgetSettings->setShowTitle(true);
+			$activitiesWidgetSettings->setScriptBased(true);
+			$activitiesWidgetSettings->setEmbedded(true);
+			$activitiesWidgetSettings->setExpand(true);
+			$activitiesWidgetSettings->setDivname('activities');          
+			$activitiesWidgetSettings->setCourseId($pkgId);  
+			
+			$commentsWidgetSettings = new WidgetSettings();
+			$commentsWidgetSettings->setShowTitle(true);
+			$commentsWidgetSettings->setScriptBased(true);
+			$commentsWidgetSettings->setEmbedded(true);
+			$commentsWidgetSettings->setExpand(true);
+			$commentsWidgetSettings->setDivname('comments');          
+			$commentsWidgetSettings->setCourseId($pkgId);    
+			
+			$interactionsWidgetSettings = new WidgetSettings();
+			$interactionsWidgetSettings->setShowTitle(true);
+			$interactionsWidgetSettings->setScriptBased(true);
+			$interactionsWidgetSettings->setEmbedded(true);
+			$interactionsWidgetSettings->setExpand(true);
+			$interactionsWidgetSettings->setDivname('interactions');          
+			$interactionsWidgetSettings->setCourseId($pkgId);
+			
+			$summaryUrl = $rptService->GetWidgetUrl($rptAuth,'courseSummary',$summaryWidgetSettings); 
+			$learnersUrl = $rptService->GetWidgetUrl($rptAuth,'learnerRegistration',$learnersWidgetSettings); 
+			$activitiesUrl = $rptService->GetWidgetUrl($rptAuth,'courseActivities',$activitiesWidgetSettings); 
+			$commentsUrl = $rptService->GetWidgetUrl($rptAuth,'courseComments',$commentsWidgetSettings); 
+			$interactionsUrl = $rptService->GetWidgetUrl($rptAuth,'courseInteractionsShort',$interactionsWidgetSettings);   
+		   
+		    $reportageRpt = "<table cellspacing=0 cellpadding=0><tr><td colspan=2><div id='summary'>Loading...</div></td></tr>\n";      
+			$reportageRpt .= "<tr><td valign='top'><div id='learners'></div</td>\n"; 
+			$reportageRpt .= "<td valign='top'><div id='activities'></div></td></tr>\n"; 
+			$reportageRpt .= "<tr><td valign='top'><div id='comments'></div></td>\n"; 
+			$reportageRpt .= "<td valign='top'><div id='interactions'></div></td></tr></table>\n";  
+			$reportageRpt .= '<script type="text/javascript">';
+			$reportageRpt .= '$(document).ready(function(){';
+			$reportageRpt .= '	loadScript("'.$summaryUrl.'");';        
+			$reportageRpt .= '	loadScript("'.$learnersUrl.'");';    
+			$reportageRpt .= '	loadScript("'.$activitiesUrl.'");';    
+			$reportageRpt .= '	loadScript("'.$commentsUrl.'");';    
+		    $reportageRpt .= '	loadScript("'.$interactionsUrl.'");';      
+			$reportageRpt .= '});';
+			$reportageRpt .= '</script>';     
+			
+			$stylesheet = $baseUrl."Customizing/global/plugins/Services/Repository/RepositoryObject/ScormCloud/tracking/reportage.css";     
+			$reportageRpt .= '<link rel="stylesheet" type="text/css" href="'.$stylesheet.'" />';
+			
+			$trackingTable .= $reportageRpt;
 
-			$tpl->setContent($trackingTable);
+			$tpl->setContent($reportageRpt);       
+			//$tpl->setContent($trackingTable);  
 		}
 		
 		/**
@@ -577,8 +650,7 @@ class ilObjScormCloudGUI extends ilObjectPluginGUI
 		$userId = $ilias->account->getId();
 		$pkgId = $this->object->getId();
 		
-		$regClass = new ilObjScormCloudReg();
-		$reg = $regClass->getRegistration($pkgId, $userId);
+		$reg = ilObjScormCloudReg::getRegistration($pkgId, $userId);
 		
 		if ($reg == null) {
 			$reg = new ilObjScormCloudReg($pkgId, $userId);

@@ -33,9 +33,7 @@ class ilObjScormCloudReg
 			);
 		while ($rec = $ilDB->fetchAssoc($set))
 		{
-			$reg = new ilObjScormCloudReg();
-			$reg->setPkgId($pkgIdPK);
-			$reg->setUserId($rec["usr_id"]);
+			$reg = new ilObjScormCloudReg($pkgIdPK, $rec["usr_id"]);
 			$reg->setCompletion($rec["completion"]);
 			$reg->setSatisfaction($rec["satisfaction"]);
 			$reg->setScore($rec["score"]);
@@ -69,9 +67,7 @@ class ilObjScormCloudReg
 			);
 		while ($rec = $ilDB->fetchAssoc($set))
 		{
-			$reg = new ilObjScormCloudReg();
-			$reg->setPkgId($pkgIdPK);
-			$reg->setUserId($rec["usr_id"]);
+			$reg = new ilObjScormCloudReg($pkgIdPK, $rec["usr_id"]);
 			$reg->setCompletion($rec["completion"]);
 			$reg->setSatisfaction($rec["satisfaction"]);
 			$reg->setScore($rec["score"]);

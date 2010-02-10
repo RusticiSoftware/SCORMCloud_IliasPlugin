@@ -51,15 +51,15 @@ class RegistrationService{
 			//Optional Arguments
 			if(isset($resultsPostbackUrl))
 			{
-				$params['resultspostbackurl'] = $resultsPostbackUrl;
+				$params['postbackurl'] = $resultsPostbackUrl;
 			}
 			if(isset($postBackLoginName))
 			{
-				$params['postbackloginname'] = $postBackLoginName;
+				$params['urlname'] = $postBackLoginName;
 			}
 			if(isset($postBackLoginPassword))
 			{
-				$params['postbackloginpassword'] = $postBackLoginPassword;
+				$params['urlpass'] = $postBackLoginPassword;
 			}
 			if(isset($versionId))
 			{
@@ -245,10 +245,11 @@ class RegistrationService{
         /// </summary>
         /// <param name="registrationId">Unique Identifier for the registration</param>
         /// <param name="redirectOnExitUrl">Upon exit, the url that the SCORM player will redirect to</param>
+        /// <param name="cssUrl">Absolute url that points to a custom player style sheet</param>
 		/// <param name="debugLogPointerUrl">Url that the server will postback a "pointer" url regarding
         /// a saved debug log that resides on s3</param>
         /// <returns>URL to launch</returns>
-        public function GetLaunchUrl($registrationId, $redirectOnExitUrl=null, $debugLogPointerUrl=null)
+        public function GetLaunchUrl($registrationId, $redirectOnExitUrl=null, $cssUrl=null, $debugLogPointerUrl=null,$courseTags=null, $learnerTags=null)
         {
             $request = new ServiceRequest($this->_configuration);
 			$params = array('regid' => $registrationId);
@@ -257,13 +258,25 @@ class RegistrationService{
 			{
                 $params['redirecturl'] = $redirectOnExitUrl;
 			} 
+            if(isset($cssUrl))
+			{
+                $params['cssurl'] = $cssUrl;
+			} 
 			if(isset($debugLogPointerUrl))
 			{
 				$params['saveDebugLogPointerUrl'] = $debugLogPointerUrl;			
 			}
+            if(isset($courseTags))
+			{
+				$params['courseTags'] = $courseTags;		
+			}
+            if(isset($learnerTags))
+			{
+				$params['learnerTags'] = $learnerTags;		
+			}
+
 			$request->setMethodParams($params);
            	return $request->ConstructUrl("rustici.registration.launch");
-
         }
 	
 	
@@ -281,9 +294,8 @@ class RegistrationService{
 		$request->setMethodParams($params);
         
         $response = $request->CallService("rustici.registration.getLaunchHistory");
-	//echo $response;
-		//$LaunchInfo = new LaunchInfo(null);
-        $historyArray = LaunchInfo::ConvertToLaunchInfoList($response);
+
+		$historyArray = LaunchInfo::ConvertToLaunchInfoList($response);
 		return $historyArray;
     }
 

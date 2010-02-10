@@ -13,7 +13,7 @@ require_once 'ServiceRequest.php';
 require_once 'CourseService.php';
 require_once 'RegistrationService.php';
 require_once 'UploadService.php';
-
+require_once 'ReportingService.php';
 
 class ScormEngineService{
 
@@ -31,6 +31,7 @@ class ScormEngineService{
         $this->_courseService = new CourseService($this->_configuration);
         $this->_registrationService = new RegistrationService($this->_configuration);
         $this->_uploadService = new UploadService($this->_configuration);
+		$this->_reportingService = new ReportingService($this->_configuration);
         //$_ftpService = new FtpService(configuration);
 	}
 	
@@ -62,6 +63,16 @@ class ScormEngineService{
     public function getUploadService()
     {
         return $this->_uploadService;
+    }
+
+	/**
+	* <summary>
+    * Contains all SCORM Engine Reportage functionality.
+    * </summary>
+	*/
+    public function getReportingService()
+    {
+        return $this->_reportingService;
     }
 
 	/**
